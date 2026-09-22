@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { CHERUVUGATTU, fetchPanchangamRange } from '../../src/api/client';
+import { fetchPanchangamRange } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
 import { Card } from '../../src/components/Card';
 import { colors } from '../../src/theme';
 import { monthBounds, MONTH_NAMES } from '../../src/monthGrid';
+import { usePanchangamSettings } from '../../src/settings';
 
 interface FestivalDay {
   date: string;
@@ -14,6 +15,7 @@ interface FestivalDay {
 }
 
 export default function FestivalsScreen() {
+  const { city } = usePanchangamSettings();
   const now = new Date();
   const [items, setItems] = useState<FestivalDay[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export default function FestivalsScreen() {
     try {
       setError(null);
       const { start, end } = monthBounds(now.getFullYear(), now.getMonth());
-      const days: PanchangamResponse[] = await fetchPanchangamRange(start, end, CHERUVUGATTU);
+      const days: PanchangamResponse[] = await fetchPanchangamRange(start, end, city);
       const festivalDays: FestivalDay[] = [];
       for (const day of days) {
         for (const name of day.festivals) {
@@ -33,12 +35,12 @@ export default function FestivalsScreen() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load festivals');
     }
-  }, []);
+  }, [city]);
 
   useFocusEffect(
     useCallback(() => {
-      if (!items) load();
-    }, [items, load]),
+      load();
+    }, [load]),
   );
 
   return (
@@ -47,7 +49,7 @@ export default function FestivalsScreen() {
         <View style={styles.header}>
           <Text style={styles.eyebrow}>SoHum పంచాంగం</Text>
           <Text style={styles.title}>పండుగలు</Text>
-          <Text style={styles.subtitle}>{MONTH_NAMES[now.getMonth()]} {now.getFullYear()} · Cheruvugattu</Text>
+          <Text style={styles.subtitle}>{MONTH_NAMES[now.getMonth()]} {now.getFullYear()} · {city.name_en}</Text>
         </View>
 
         {error && <Text style={styles.errorText}>{error}</Text>}

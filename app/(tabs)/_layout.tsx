@@ -60,6 +60,13 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused }) => <TabIcon symbol="🏛" focused={focused} />,
         }}
       />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: 'మరిన్ని',
+          tabBarIcon: ({ focused }) => <TabIcon symbol="☷" focused={focused} />,
+        }}
+      />
     </Tabs>
   );
 }

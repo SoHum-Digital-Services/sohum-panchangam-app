@@ -32,6 +32,9 @@ export default function TempleScreen() {
           <Text style={styles.eyebrow}>Temple sevas</Text>
           <Text style={styles.title}>చెరువుగట్టు దేవస్థానం</Text>
           <Text style={styles.subtitle}>Sri Parvathi Jadala Ramalingeshwara Swamy Devasthanam</Text>
+          <Pressable accessibilityRole="link" style={({ pressed }) => [styles.websiteButton, pressed && styles.websiteButtonPressed]} onPress={() => Linking.openURL(TEMPLE_BOOKING_URL)}>
+            <Text style={styles.websiteButtonText}>Visit cheruvugattu.online ↗</Text>
+          </Pressable>
         </View>
 
         {error && (
@@ -82,10 +85,13 @@ export default function TempleScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, alignItems: 'center', backgroundColor: colors.creamDeep },
   appFrame: { width: '100%', maxWidth: 430, flex: 1, backgroundColor: colors.cream },
-  header: { margin: 16, marginTop: 48, borderRadius: 24, backgroundColor: colors.maroon, padding: 16, shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.14, shadowRadius: 16, elevation: 3 },
+  header: { margin: 16, marginTop: 48, borderRadius: 20, backgroundColor: colors.maroon, padding: 16 },
   eyebrow: { color: colors.gold, fontWeight: '800', fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase' },
   title: { fontSize: 22, fontWeight: '800', color: colors.white, marginTop: 5, lineHeight: 28 },
   subtitle: { color: '#ffe7d8', marginTop: 5, fontSize: 12, lineHeight: 17, fontWeight: '600' },
+  websiteButton: { alignSelf: 'flex-start', marginTop: 12, minHeight: 44, paddingHorizontal: 12, borderRadius: 12, justifyContent: 'center', backgroundColor: '#ffffff18', borderWidth: 1, borderColor: '#ffffff2e' },
+  websiteButtonPressed: { backgroundColor: '#ffffff2b' },
+  websiteButtonText: { color: colors.white, fontSize: 12, fontWeight: '800' },
   errorText: { color: colors.maroon, textAlign: 'center', padding: 16 },
   list: { padding: 16, paddingTop: 0, gap: 10, paddingBottom: 28 },
   card: {},
@@ -97,6 +103,6 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', gap: 12, marginTop: 10, flexWrap: 'wrap' },
   metaText: { color: colors.muted, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
   instructions: { color: colors.maroon, fontSize: 12, marginTop: 8, fontStyle: 'italic' },
-  bookButton: { marginTop: 12, backgroundColor: colors.maroon, borderRadius: 14, paddingVertical: 10, alignItems: 'center' },
+  bookButton: { marginTop: 12, minHeight: 44, backgroundColor: colors.maroon, borderRadius: 14, paddingVertical: 10, alignItems: 'center', justifyContent: 'center' },
   bookButtonText: { color: colors.white, fontWeight: '800', fontSize: 13 },
 });

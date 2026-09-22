@@ -1,34 +1,44 @@
-import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { CHERUVUGATTU, fetchPanchangam } from '../../src/api/client';
+import { fetchPanchangam } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
 import { Card } from '../../src/components/Card';
 import { colors } from '../../src/theme';
 import { addDays, formatDateLong, formatDateParts, formatTime, isoDate } from '../../src/format';
 import { muhurtaLines, pakshaTe, primaryDayLines, weekdayShort } from '../../src/panchangamUi';
+import { PANCHANGAM_CITIES, usePanchangamSettings } from '../../src/settings';
 
 const TODAY = isoDate(new Date());
+const RAIL_CARD_WIDTH = 312;
+const RAIL_GAP = 12;
+const RAIL_SNAP_INTERVAL = RAIL_CARD_WIDTH + RAIL_GAP;
 
 export default function TodayScreen() {
+  const { city, setCity } = usePanchangamSettings();
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [cache, setCache] = useState<Record<string, PanchangamResponse>>({});
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const data = cache[selectedDate] ?? null;
+
+  useEffect(() => {
+    setCache({});
+  }, [city.slug]);
 
   const load = useCallback(async (date: string, force = false) => {
     if (!force && cache[date]) return;
     try {
       setError(null);
-      const result = await fetchPanchangam(date, CHERUVUGATTU);
+      const result = await fetchPanchangam(date, city);
       setCache((current) => ({ ...current, [date]: result }));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load panchangam');
     } finally {
       setRefreshing(false);
     }
-  }, [cache]);
+  }, [cache, city]);
 
   useFocusEffect(
     useCallback(() => {
@@ -41,21 +51,6 @@ export default function TodayScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     load(selectedDate, true);
-  };
-
-  const goPreviousDay = useCallback(() => {
-    setSelectedDate((current) => addDays(current, -1));
-  }, []);
-
-  const goNextDay = useCallback(() => {
-    setSelectedDate((current) => addDays(current, 1));
-  }, []);
-
-  const openSettings = () => {
-    Alert.alert(
-      'SoHum Panchangam',
-      `Location: ${CHERUVUGATTU.name_en}\nCoordinates: ${CHERUVUGATTU.latitude}, ${CHERUVUGATTU.longitude}\n\nMore settings like language, location, and ayanamsha presets will be added here.`,
-    );
   };
 
   if (error) {
@@ -90,13 +85,13 @@ export default function TodayScreen() {
             </View>
             <View style={styles.brandCopy}>
               <Text style={styles.brand}>SoHum పంచాంగం</Text>
-              <Text style={styles.location}>⌖ {CHERUVUGATTU.name_te}, {CHERUVUGATTU.name_en}</Text>
+              <Text style={styles.location}>⌖ {city.name_te}, {city.name_en}</Text>
             </View>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Open settings"
               hitSlop={10}
-              onPress={openSettings}
+              onPress={() => setSettingsOpen(true)}
               style={({ pressed }) => [styles.settingsDot, pressed && styles.pressedControl]}
             >
               <Text style={styles.settingsDotText}>⚙</Text>
@@ -104,31 +99,33 @@ export default function TodayScreen() {
           </View>
 
           <View style={styles.datePanel}>
-            <View pointerEvents="none" style={styles.panelGlow} />
-            <TouchableOpacity
+            <View style={styles.dayNav}>
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Previous day"
-              activeOpacity={0.65}
-              onPress={goPreviousDay}
-              style={[styles.arrowButton, styles.leftArrowButton]}
+              hitSlop={8}
+              onPress={() => setSelectedDate(addDays(data.date, -1))}
+              style={({ pressed }) => [styles.arrowButton, pressed && styles.arrowButtonPressed]}
             >
               <Text style={styles.arrowText}>‹</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel="Next day"
-              activeOpacity={0.65}
-              onPress={goNextDay}
-              style={[styles.arrowButton, styles.rightArrowButton]}
-            >
-              <Text style={styles.arrowText}>›</Text>
-            </TouchableOpacity>
-            <View pointerEvents="none" style={styles.dayNav}>
+            </Pressable>
               <View style={styles.dayTitle}>
                 <Text style={styles.vara}>{data.vara.name_te}</Text>
                 <Text style={styles.date}>{formatDateLong(data.date)}</Text>
                 <Text style={styles.monthLine}>{data.lunar_month.name_te} · {pakshaTe(data.tithi.paksha)} పక్షం</Text>
               </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Next day"
+              hitSlop={8}
+              onPress={() => {
+                const nextDate = addDays(data.date, 1);
+                setSelectedDate(nextDate);
+              }}
+              style={({ pressed }) => [styles.arrowButton, pressed && styles.arrowButtonPressed]}
+            >
+              <Text style={styles.arrowText}>›</Text>
+            </Pressable>
             </View>
 
             <View style={styles.dateStrip}>
@@ -161,7 +158,7 @@ export default function TodayScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             decelerationRate="fast"
-            snapToInterval={312}
+            snapToInterval={RAIL_SNAP_INTERVAL}
             contentContainerStyle={styles.cardRail}
           >
             <Card style={[styles.heroCard, styles.railCard]}>
@@ -220,7 +217,7 @@ export default function TodayScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             decelerationRate="fast"
-            snapToInterval={312}
+            snapToInterval={RAIL_SNAP_INTERVAL}
             contentContainerStyle={styles.cardRail}
           >
             <DetailPanel title="పంచాంగ సారాంశం" subtitle="Panchangam" lines={primaryDayLines(data)} style={styles.railCard} />
@@ -232,7 +229,54 @@ export default function TodayScreen() {
           </ScrollView>
         </View>
       </View>
+      <SettingsModal
+        citySlug={city.slug}
+        onClose={() => setSettingsOpen(false)}
+        onSelectCity={(slug) => {
+          const nextCity = PANCHANGAM_CITIES.find((candidate) => candidate.slug === slug);
+          if (nextCity) setCity(nextCity);
+          setSettingsOpen(false);
+        }}
+        visible={settingsOpen}
+      />
     </ScrollView>
+  );
+}
+
+function SettingsModal({ citySlug, onClose, onSelectCity, visible }: { citySlug: string; onClose: () => void; onSelectCity: (slug: string) => void; visible: boolean }) {
+  return (
+    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+      <View style={styles.modalBackdrop}>
+        <View style={styles.settingsSheet}>
+          <View style={styles.sheetHeader}>
+            <View>
+              <Text style={styles.sheetEyebrow}>Panchangam settings</Text>
+              <Text style={styles.sheetTitle}>స్థానం & పద్ధతి</Text>
+            </View>
+            <Pressable accessibilityRole="button" accessibilityLabel="Close settings" hitSlop={8} onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>×</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.settingLabel}>Calculation location</Text>
+          {PANCHANGAM_CITIES.map((candidate) => {
+            const selected = candidate.slug === citySlug;
+            return (
+              <Pressable key={candidate.slug} accessibilityRole="button" onPress={() => onSelectCity(candidate.slug)} style={({ pressed }) => [styles.cityOption, selected && styles.cityOptionSelected, pressed && styles.pressedControl]}>
+                <View>
+                  <Text style={[styles.cityName, selected && styles.cityNameSelected]}>{candidate.name_te}</Text>
+                  <Text style={[styles.cityMeta, selected && styles.cityMetaSelected]}>{candidate.name_en}</Text>
+                </View>
+                <Text style={styles.cityCheck}>{selected ? '✓' : ''}</Text>
+              </Pressable>
+            );
+          })}
+          <View style={styles.methodNote}>
+            <Text style={styles.methodTitle}>Calculation profile</Text>
+            <Text style={styles.methodText}>Drik Panchangam · Lahiri ayanamsha · sunrise-based Vedic day</Text>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -264,17 +308,15 @@ const styles = StyleSheet.create({
   brandCopy: { flex: 1 },
   brand: { color: colors.ink, fontWeight: '800', fontSize: 19 },
   location: { color: colors.muted, marginTop: 3, fontWeight: '600', fontSize: 11 },
-  settingsDot: { width: 34, height: 34, borderRadius: 12, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
+  settingsDot: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
   settingsDotText: { color: colors.maroon },
   pressedControl: { opacity: 0.72 },
-  datePanel: { marginTop: 14, borderRadius: 24, padding: 13, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 16, elevation: 3, position: 'relative' },
-  panelGlow: { position: 'absolute', width: 160, height: 160, borderRadius: 80, right: -54, top: -72, backgroundColor: '#ffffff12' },
-  dayNav: { minHeight: 74, width: '100%', alignItems: 'center', justifyContent: 'center', zIndex: 2 },
-  arrowButton: { position: 'absolute', top: 20, width: 72, height: 64, borderRadius: 18, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center', zIndex: 20, elevation: 20 },
-  leftArrowButton: { left: 13 },
-  rightArrowButton: { right: 13 },
-  arrowText: { color: colors.white, fontSize: 28, lineHeight: 30 },
-  dayTitle: { width: '100%', alignItems: 'center', paddingHorizontal: 62 },
+  datePanel: { marginTop: 14, borderRadius: 20, padding: 13, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 16, elevation: 3 },
+  dayNav: { minHeight: 72, width: '100%', alignItems: 'center', flexDirection: 'row', zIndex: 2 },
+  arrowButton: { width: 48, height: 48, borderRadius: 14, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center' },
+  arrowButtonPressed: { backgroundColor: '#ffffff28' },
+  arrowText: { color: colors.white, fontSize: 27, lineHeight: 30 },
+  dayTitle: { flex: 1, alignItems: 'center', paddingHorizontal: 8 },
   vara: { color: colors.gold, fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
   date: { color: colors.white, fontSize: 19, fontWeight: '800', marginTop: 2, textAlign: 'center', lineHeight: 24 },
   monthLine: { color: '#ffe7d8', marginTop: 4, fontWeight: '600', fontSize: 12, textAlign: 'center' },
@@ -288,8 +330,8 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 18, marginTop: 2 },
   sectionTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
   swipeHint: { color: colors.muted, fontSize: 11, fontWeight: '700' },
-  cardRail: { paddingHorizontal: 16, gap: 10, paddingVertical: 6 },
-  railCard: { width: 300, minHeight: 172 },
+  cardRail: { paddingHorizontal: 16, gap: RAIL_GAP, paddingVertical: 6 },
+  railCard: { width: RAIL_CARD_WIDTH, height: 194 },
   heroCard: { backgroundColor: colors.card, borderColor: colors.line, padding: 14 },
   heroTopRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   heroCopy: { flex: 1 },
@@ -297,15 +339,15 @@ const styles = StyleSheet.create({
   heroValue: { color: colors.ink, fontSize: 26, fontWeight: '800', marginTop: 4, letterSpacing: -0.4 },
   heroSub: { color: colors.muted, marginTop: 3, fontWeight: '600', fontSize: 13 },
   heroSmall: { color: colors.maroon, marginTop: 8, fontWeight: '700', fontSize: 13 },
-  heroMoon: { width: 58, height: 58, borderRadius: 18, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
-  heroMoonText: { color: '#e8edf4', fontSize: 34 },
+  heroMoon: { width: 46, height: 46, borderRadius: 14, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
+  heroMoonText: { color: '#e8edf4', fontSize: 27 },
   sunGrid: { flexDirection: 'row', gap: 8, marginTop: 12 },
   sunChip: { flex: 1, borderRadius: 14, backgroundColor: colors.peach, paddingVertical: 9, paddingHorizontal: 10 },
   cardLabel: { color: colors.muted, fontWeight: '700', fontSize: 11 },
   compactValue: { color: colors.ink, fontSize: 16, fontWeight: '800', marginTop: 3 },
   moonDateRow: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: colors.card, borderRadius: 18, borderWidth: 1, borderColor: colors.line, padding: 14, shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 1 },
-  moonBadge: { width: 62, height: 62, borderRadius: 18, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
-  moonIcon: { color: '#dfe3ea', fontSize: 38 },
+  moonBadge: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
+  moonIcon: { color: '#dfe3ea', fontSize: 28 },
   dateBlock: { flex: 1 },
   dateBlockDay: { color: colors.maroon, fontSize: 28, fontWeight: '800', letterSpacing: -0.4 },
   dateBlockMonth: { fontSize: 20 },
@@ -323,4 +365,22 @@ const styles = StyleSheet.create({
   festivalText: { color: colors.maroon, fontWeight: '700', fontSize: 13, marginTop: 7 },
   sankalpamCard: { borderLeftWidth: 4, borderLeftColor: colors.saffron },
   sankalpamText: { color: colors.ink, fontSize: 13, lineHeight: 20, marginTop: 7 },
+  modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#291a1370' },
+  settingsSheet: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28 },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  sheetEyebrow: { color: colors.orange, fontSize: 11, fontWeight: '800', letterSpacing: 0.3, textTransform: 'uppercase' },
+  sheetTitle: { color: colors.ink, fontSize: 20, fontWeight: '800', marginTop: 2 },
+  closeButton: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.cream },
+  closeButtonText: { color: colors.maroon, fontSize: 26, lineHeight: 30 },
+  settingLabel: { color: colors.muted, fontSize: 11, fontWeight: '800', letterSpacing: 0.3, marginBottom: 7, textTransform: 'uppercase' },
+  cityOption: { minHeight: 54, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 14, borderWidth: 1, borderColor: colors.line, marginBottom: 7 },
+  cityOptionSelected: { backgroundColor: colors.maroon, borderColor: colors.maroon },
+  cityName: { color: colors.ink, fontSize: 14, fontWeight: '800' },
+  cityNameSelected: { color: colors.white },
+  cityMeta: { color: colors.muted, fontSize: 11, fontWeight: '600', marginTop: 1 },
+  cityMetaSelected: { color: '#ffe7d8' },
+  cityCheck: { color: colors.gold, fontSize: 18, fontWeight: '800' },
+  methodNote: { borderRadius: 14, backgroundColor: colors.peach, marginTop: 7, padding: 12 },
+  methodTitle: { color: colors.maroon, fontSize: 12, fontWeight: '800' },
+  methodText: { color: colors.ink, fontSize: 12, lineHeight: 18, marginTop: 3 },
 });

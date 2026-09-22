@@ -1,17 +1,22 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { CHERUVUGATTU, fetchPanchangamRange } from '../../src/api/client';
+import { fetchPanchangamRange } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
 import { Card } from '../../src/components/Card';
 import { colors } from '../../src/theme';
 import { formatDateParts, formatTime, isoDate } from '../../src/format';
 import { buildMonthGrid, monthBounds, MONTH_NAMES, WEEKDAY_LABELS } from '../../src/monthGrid';
 import { calendarMarkers, muhurtaLines, pakshaTe, primaryDayLines } from '../../src/panchangamUi';
+import { usePanchangamSettings } from '../../src/settings';
 
 const TODAY = isoDate(new Date());
+const RAIL_CARD_WIDTH = 312;
+const RAIL_GAP = 12;
+const RAIL_SNAP_INTERVAL = RAIL_CARD_WIDTH + RAIL_GAP;
 
 export default function CalendarScreen() {
+  const { city } = usePanchangamSettings();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
@@ -24,7 +29,7 @@ export default function CalendarScreen() {
       setError(null);
       setDays(null);
       const { start, end } = monthBounds(y, m);
-      const results = await fetchPanchangamRange(start, end, CHERUVUGATTU);
+      const results = await fetchPanchangamRange(start, end, city);
       const byDate: Record<string, PanchangamResponse> = {};
       for (const d of results) byDate[d.date] = d;
       setDays(byDate);
@@ -32,7 +37,7 @@ export default function CalendarScreen() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load calendar');
     }
-  }, []);
+  }, [city]);
 
   useFocusEffect(
     useCallback(() => {
@@ -64,7 +69,7 @@ export default function CalendarScreen() {
           </Pressable>
           <View style={styles.monthTitleWrap}>
             <Text style={styles.monthTitle}>{MONTH_NAMES[month]} {year}</Text>
-            <Text style={styles.location}>⌖ {CHERUVUGATTU.name_en}</Text>
+            <Text style={styles.location}>⌖ {city.name_en}</Text>
           </View>
           <Pressable onPress={goNextMonth} style={styles.navButton}>
             <Text style={styles.navButtonText}>›</Text>
@@ -134,7 +139,7 @@ function SelectedDayDetails({ day }: { day: PanchangamResponse }) {
         horizontal
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
-        snapToInterval={312}
+        snapToInterval={RAIL_SNAP_INTERVAL}
         contentContainerStyle={styles.cardRail}
       >
         <View style={[styles.summaryRow, styles.railCard]}>
@@ -193,7 +198,7 @@ const styles = StyleSheet.create({
   shell: { alignItems: 'center', minHeight: '100%' },
   appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: colors.cream },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingTop: 48, paddingBottom: 14, backgroundColor: colors.cream },
-  navButton: { width: 36, height: 36, borderRadius: 13, backgroundColor: colors.maroon, alignItems: 'center', justifyContent: 'center', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2 },
+  navButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.maroon, alignItems: 'center', justifyContent: 'center', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2 },
   navButtonText: { color: colors.white, fontSize: 23, fontWeight: '800', lineHeight: 25 },
   monthTitleWrap: { alignItems: 'center' },
   monthTitle: { fontSize: 22, fontWeight: '800', color: colors.ink, letterSpacing: -0.2 },
@@ -216,11 +221,11 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 18 },
   sectionTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
   swipeHint: { color: colors.muted, fontSize: 11, fontWeight: '700' },
-  cardRail: { paddingHorizontal: 16, gap: 10, paddingVertical: 6 },
-  railCard: { width: 300, minHeight: 172 },
+  cardRail: { paddingHorizontal: 16, gap: RAIL_GAP, paddingVertical: 6 },
+  railCard: { width: RAIL_CARD_WIDTH, height: 194 },
   summaryRow: { flexDirection: 'row', gap: 12, alignItems: 'center', marginVertical: 2, backgroundColor: colors.card, borderRadius: 18, borderWidth: 1, borderColor: colors.line, padding: 14, shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 1 },
-  moonBadge: { width: 62, height: 62, borderRadius: 18, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
-  moonIcon: { color: '#dfe3ea', fontSize: 38 },
+  moonBadge: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
+  moonIcon: { color: '#dfe3ea', fontSize: 28 },
   dateBlock: { flex: 1 },
   dateBlockDay: { color: colors.maroon, fontSize: 28, fontWeight: '800', letterSpacing: -0.4 },
   dateBlockMonth: { fontSize: 20 },
