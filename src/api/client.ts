@@ -33,3 +33,25 @@ export async function fetchPanchangam(
   }
   return res.json();
 }
+
+export async function fetchPanchangamRange(
+  startDate: string,
+  endDate: string,
+  city: City,
+): Promise<PanchangamResponse[]> {
+  const res = await fetch(`${BASE_URL}/v1/panchangam/range`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      start_date: startDate,
+      end_date: endDate,
+      latitude: city.latitude,
+      longitude: city.longitude,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Panchangam range API error: ${res.status}`);
+  }
+  const body: { count: number; days: PanchangamResponse[] } = await res.json();
+  return body.days;
+}
