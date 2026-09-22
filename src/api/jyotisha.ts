@@ -1,6 +1,6 @@
 import { API_BASE_URL } from './client';
 
-export interface BirthDetails { name: string; birth_date: string; birth_time: string; latitude: string; longitude: string; }
+export interface BirthDetails { name: string; birth_date: string; birth_time: string; latitude: string; longitude: string; place_label: string; }
 export interface HoroscopeResult {
   subject: { name: string | null; birth_local: string };
   ascendant: { sign: string; nakshatra: string; pada: number };

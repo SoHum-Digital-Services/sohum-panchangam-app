@@ -13,7 +13,7 @@ export default function HoroscopeScreen() {
   const [result, setResult] = useState<HoroscopeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const submit = async () => { setLoading(true); setError(null); try { setResult(await calculateHoroscope(details, doshaMode)); } catch (e) { setError(e instanceof Error ? e.message : 'Calculation failed'); } finally { setLoading(false); } };
+  const submit = async () => { if (!details.name.trim()) { setError('Please enter a name'); return; } setLoading(true); setError(null); try { setResult(await calculateHoroscope(details, doshaMode)); } catch (e) { setError(e instanceof Error ? e.message : 'Calculation failed'); } finally { setLoading(false); } };
   return <ScrollView style={styles.screen} contentContainerStyle={styles.shell}><View style={styles.frame}>
     <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>‹</Text></Pressable>
     <View style={styles.header}><Text style={styles.eyebrow}>{doshaMode ? 'Birth nakshatra check' : 'SoHum Jyotisha'}</Text><Text style={styles.title}>{doshaMode ? 'శిశు జనన దోషం' : 'జాతకం'}</Text><Text style={styles.subtitle}>{doshaMode ? 'Gandamool, Manglik and Kaal Sarp flags' : 'Native chart, divisional charts and active daśā'}</Text></View>

@@ -12,7 +12,7 @@ export default function CompatibilityScreen() {
   const [result, setResult] = useState<CompatibilityResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const submit = async () => { setLoading(true); setError(null); try { setResult(await calculateCompatibility(bride, groom)); } catch (e) { setError(e instanceof Error ? e.message : 'Calculation failed'); } finally { setLoading(false); } };
+  const submit = async () => { if (!bride.name.trim() || !groom.name.trim()) { setError('Please enter both names'); return; } setLoading(true); setError(null); try { setResult(await calculateCompatibility(bride, groom)); } catch (e) { setError(e instanceof Error ? e.message : 'Calculation failed'); } finally { setLoading(false); } };
   return <ScrollView style={styles.screen} contentContainerStyle={styles.shell}><View style={styles.frame}>
     <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>‹</Text></Pressable>
     <View style={styles.header}><Text style={styles.eyebrow}>Aṣṭakoota · Guna Milan</Text><Text style={styles.title}>వివాహ పొంతన</Text><Text style={styles.subtitle}>Traditional 36-point marriage compatibility</Text></View>
