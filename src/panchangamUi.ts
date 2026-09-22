@@ -1,9 +1,11 @@
 import type { PanchangamResponse } from './api/types';
 import { formatTime } from './format';
+import type { AppLanguage } from './settings';
 
 export const weekdayTeShort = ['ఆది', 'సోమ', 'మంగళ', 'బుధ', 'గురు', 'శుక్ర', 'శని'];
 
-export function weekdayShort(dateStr: string): string {
+export function weekdayShort(dateStr: string, language: AppLanguage = 'te'): string {
+  if (language === 'en') return new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-IN', { weekday: 'short' });
   return weekdayTeShort[new Date(`${dateStr}T00:00:00`).getDay()];
 }
 
@@ -29,25 +31,27 @@ export function calendarMarkers(day?: PanchangamResponse): string[] {
   return markers.slice(0, 3);
 }
 
-export function primaryDayLines(day: PanchangamResponse): Array<{ label: string; value: string }> {
+export function primaryDayLines(day: PanchangamResponse, language: AppLanguage = 'te'): Array<{ label: string; value: string }> {
+  const te = language === 'te';
   return [
-    { label: 'సం.', value: `${day.samvatsara.name_te}, ${day.ayana.name_te}` },
-    { label: 'మాసం', value: `${day.lunar_month.name_te}, ${pakshaTe(day.tithi.paksha)} పక్షం` },
-    { label: 'తిథి', value: `${day.tithi.name_te} upto ${formatTime(day.tithi.ends_at)}` },
-    { label: 'వాసరః', value: day.vara.name_te },
-    { label: 'నక్షత్రం', value: `${day.nakshatra.name_te} upto ${formatTime(day.nakshatra.ends_at)}` },
-    { label: 'దివసం', value: `${formatTime(day.sunrise)} - ${formatTime(day.sunset)}` },
+    { label: te ? 'సం.' : 'Year', value: te ? `${day.samvatsara.name_te}, ${day.ayana.name_te}` : `${day.samvatsara.name_en}, ${day.ayana.name_en}` },
+    { label: te ? 'మాసం' : 'Month', value: te ? `${day.lunar_month.name_te}, ${pakshaTe(day.tithi.paksha)} పక్షం` : `${day.lunar_month.name_en}, ${day.tithi.paksha} Paksha` },
+    { label: te ? 'తిథి' : 'Tithi', value: `${te ? day.tithi.name_te : day.tithi.name_en} · ${formatTime(day.tithi.ends_at)}` },
+    { label: te ? 'వాసరః' : 'Weekday', value: te ? day.vara.name_te : day.vara.name_en },
+    { label: te ? 'నక్షత్రం' : 'Nakshatra', value: `${te ? day.nakshatra.name_te : day.nakshatra.name_en} · ${formatTime(day.nakshatra.ends_at)}` },
+    { label: te ? 'దివసం' : 'Daylight', value: `${formatTime(day.sunrise)} - ${formatTime(day.sunset)}` },
   ];
 }
 
-export function muhurtaLines(day: PanchangamResponse): Array<{ label: string; value: string }> {
+export function muhurtaLines(day: PanchangamResponse, language: AppLanguage = 'te'): Array<{ label: string; value: string }> {
   const m = day.muhurta;
+  const te = language === 'te';
   return [
-    { label: 'రాహు కాలం', value: `${formatTime(m.rahu_kalam.starts_at)} to ${formatTime(m.rahu_kalam.ends_at)}` },
-    { label: 'యమగండం', value: `${formatTime(m.yamagandam.starts_at)} to ${formatTime(m.yamagandam.ends_at)}` },
-    { label: 'గుళికా కాలం', value: `${formatTime(m.gulika_kalam.starts_at)} to ${formatTime(m.gulika_kalam.ends_at)}` },
-    { label: 'అభిజిత్', value: `${formatTime(m.abhijit.starts_at)} to ${formatTime(m.abhijit.ends_at)}` },
-    { label: 'బ్రహ్మ ముహూర్తం', value: `${formatTime(m.brahma_muhurtam.starts_at)} to ${formatTime(m.brahma_muhurtam.ends_at)}` },
-    { label: 'ప్రదోష కాలం', value: `${formatTime(m.pradosha_kalam.starts_at)} to ${formatTime(m.pradosha_kalam.ends_at)}` },
+    { label: te ? 'రాహు కాలం' : 'Rahu Kalam', value: `${formatTime(m.rahu_kalam.starts_at)} to ${formatTime(m.rahu_kalam.ends_at)}` },
+    { label: te ? 'యమగండం' : 'Yamagandam', value: `${formatTime(m.yamagandam.starts_at)} to ${formatTime(m.yamagandam.ends_at)}` },
+    { label: te ? 'గుళికా కాలం' : 'Gulika Kalam', value: `${formatTime(m.gulika_kalam.starts_at)} to ${formatTime(m.gulika_kalam.ends_at)}` },
+    { label: te ? 'అభిజిత్' : 'Abhijit', value: `${formatTime(m.abhijit.starts_at)} to ${formatTime(m.abhijit.ends_at)}` },
+    { label: te ? 'బ్రహ్మ ముహూర్తం' : 'Brahma Muhurta', value: `${formatTime(m.brahma_muhurtam.starts_at)} to ${formatTime(m.brahma_muhurtam.ends_at)}` },
+    { label: te ? 'ప్రదోష కాలం' : 'Pradosham', value: `${formatTime(m.pradosha_kalam.starts_at)} to ${formatTime(m.pradosha_kalam.ends_at)}` },
   ];
 }

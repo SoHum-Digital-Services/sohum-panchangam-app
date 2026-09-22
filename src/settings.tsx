@@ -1,6 +1,8 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import { CHERUVUGATTU, City } from './api/client';
 
+export type AppLanguage = 'te' | 'en';
+
 export const PANCHANGAM_CITIES: City[] = [
   CHERUVUGATTU,
   { slug: 'hyderabad', name_en: 'Hyderabad', name_te: 'హైదరాబాద్', latitude: 17.385, longitude: 78.4867 },
@@ -11,13 +13,16 @@ export const PANCHANGAM_CITIES: City[] = [
 interface PanchangamSettingsValue {
   city: City;
   setCity: (city: City) => void;
+  language: AppLanguage;
+  setLanguage: (language: AppLanguage) => void;
 }
 
 const PanchangamSettingsContext = createContext<PanchangamSettingsValue | null>(null);
 
 export function PanchangamSettingsProvider({ children }: { children: ReactNode }) {
   const [city, setCity] = useState(CHERUVUGATTU);
-  const value = useMemo(() => ({ city, setCity }), [city]);
+  const [language, setLanguage] = useState<AppLanguage>('te');
+  const value = useMemo(() => ({ city, setCity, language, setLanguage }), [city, language]);
   return <PanchangamSettingsContext.Provider value={value}>{children}</PanchangamSettingsContext.Provider>;
 }
 

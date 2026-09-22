@@ -15,7 +15,8 @@ const RAIL_GAP = 12;
 const RAIL_SNAP_INTERVAL = RAIL_CARD_WIDTH + RAIL_GAP;
 
 export default function TodayScreen() {
-  const { city, setCity } = usePanchangamSettings();
+  const { city, setCity, language, setLanguage } = usePanchangamSettings();
+  const telugu = language === 'te';
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [cache, setCache] = useState<Record<string, PanchangamResponse>>({});
   const [error, setError] = useState<string | null>(null);
@@ -84,8 +85,8 @@ export default function TodayScreen() {
               <Text style={styles.logoBadgeText}>ఓం</Text>
             </View>
             <View style={styles.brandCopy}>
-              <Text style={styles.brand}>SoHum పంచాంగం</Text>
-              <Text style={styles.location}>⌖ {city.name_te}, {city.name_en}</Text>
+              <Text style={styles.brand}>{telugu ? 'SoHum పంచాంగం' : 'SoHum Panchangam'}</Text>
+              <Text style={styles.location}>⌖ {telugu ? city.name_te : city.name_en}</Text>
             </View>
             <Pressable
               accessibilityRole="button"
@@ -110,9 +111,9 @@ export default function TodayScreen() {
               <Text style={styles.arrowText}>‹</Text>
             </Pressable>
               <View style={styles.dayTitle}>
-                <Text style={styles.vara}>{data.vara.name_te}</Text>
+                <Text style={styles.vara}>{telugu ? data.vara.name_te : data.vara.name_en}</Text>
                 <Text style={styles.date}>{formatDateLong(data.date)}</Text>
-                <Text style={styles.monthLine}>{data.lunar_month.name_te} · {pakshaTe(data.tithi.paksha)} పక్షం</Text>
+                <Text style={styles.monthLine}>{telugu ? `${data.lunar_month.name_te} · ${pakshaTe(data.tithi.paksha)} పక్షం` : `${data.lunar_month.name_en} · ${data.tithi.paksha} Paksha`}</Text>
               </View>
             <Pressable
               accessibilityRole="button"
@@ -139,7 +140,7 @@ export default function TodayScreen() {
                     onPress={() => setSelectedDate(date)}
                     style={({ pressed }) => [styles.datePill, active && styles.datePillActive, pressed && styles.pressedControl]}
                   >
-                    <Text style={[styles.datePillWeekday, active && styles.datePillTextActive]}>{weekdayShort(date)}</Text>
+                    <Text style={[styles.datePillWeekday, active && styles.datePillTextActive]}>{weekdayShort(date, language)}</Text>
                     <Text style={[styles.datePillDay, active && styles.datePillTextActive]}>{itemParts.day}</Text>
                   </Pressable>
                 );
@@ -150,8 +151,8 @@ export default function TodayScreen() {
 
         <View style={styles.content}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today</Text>
-            <Text style={styles.swipeHint}>Swipe cards →</Text>
+            <Text style={styles.sectionTitle}>{telugu ? 'ఈరోజు' : 'Today'}</Text>
+            <Text style={styles.swipeHint}>{telugu ? 'కార్డులను స్వైప్ చేయండి →' : 'Swipe cards →'}</Text>
           </View>
 
           <ScrollView
@@ -164,10 +165,10 @@ export default function TodayScreen() {
             <Card style={[styles.heroCard, styles.railCard]}>
               <View style={styles.heroTopRow}>
                 <View style={styles.heroCopy}>
-                  <Text style={styles.heroLabel}>ఈరోజు తిథి</Text>
-                  <Text style={styles.heroValue}>{data.tithi.name_en}</Text>
-                  <Text style={styles.heroSub}>{data.tithi.name_te} · {data.tithi.paksha} Paksha</Text>
-                  <Text style={styles.heroSmall}>Ends {formatTime(data.tithi.ends_at)}</Text>
+                  <Text style={styles.heroLabel}>{telugu ? 'ఈరోజు తిథి' : 'Today’s tithi'}</Text>
+                  <Text style={styles.heroValue}>{telugu ? data.tithi.name_te : data.tithi.name_en}</Text>
+                  <Text style={styles.heroSub}>{telugu ? `${pakshaTe(data.tithi.paksha)} పక్షం` : `${data.tithi.paksha} Paksha`}</Text>
+                  <Text style={styles.heroSmall}>{telugu ? 'ముగింపు ' : 'Ends '}{formatTime(data.tithi.ends_at)}</Text>
                 </View>
                 <View style={styles.heroMoon}>
                   <Text style={styles.heroMoonText}>◐</Text>
@@ -175,11 +176,11 @@ export default function TodayScreen() {
               </View>
               <View style={styles.sunGrid}>
                 <View style={styles.sunChip}>
-                  <Text style={styles.cardLabel}>🌅 సూర్యోదయం</Text>
+                  <Text style={styles.cardLabel}>🌅 {telugu ? 'సూర్యోదయం' : 'Sunrise'}</Text>
                   <Text style={styles.compactValue}>{formatTime(data.sunrise)}</Text>
                 </View>
                 <View style={styles.sunChip}>
-                  <Text style={styles.cardLabel}>🌇 సూర్యాస్తమయం</Text>
+                  <Text style={styles.cardLabel}>🌇 {telugu ? 'సూర్యాస్తమయం' : 'Sunset'}</Text>
                   <Text style={styles.compactValue}>{formatTime(data.sunset)}</Text>
                 </View>
               </View>
@@ -193,14 +194,14 @@ export default function TodayScreen() {
                 <Text style={styles.dateBlockDay}>{parts.day}<Text style={styles.dateBlockMonth}> {parts.month}</Text></Text>
                 <Text style={styles.dateBlockWeek}>{parts.weekday.toUpperCase()}</Text>
                 <View style={styles.dateBlockDivider} />
-                <Text style={styles.dateBlockTithi}>{data.tithi.index} {data.tithi.paksha === 'Shukla' ? 'శుక్ల' : 'బహుళ'}</Text>
-                <Text style={styles.dateBlockMonthLine}>{data.lunar_month.name_te}</Text>
+                <Text style={styles.dateBlockTithi}>{data.tithi.index} {telugu ? (data.tithi.paksha === 'Shukla' ? 'శుక్ల' : 'బహుళ') : data.tithi.paksha}</Text>
+                <Text style={styles.dateBlockMonthLine}>{telugu ? data.lunar_month.name_te : data.lunar_month.name_en}</Text>
               </View>
             </View>
 
             {data.festivals.length > 0 && (
               <Card style={[styles.festivalCard, styles.railCard]}>
-                <Text style={styles.panelTitle}>ఈరోజు విశేషం</Text>
+                <Text style={styles.panelTitle}>{telugu ? 'ఈరోజు విశేషం' : 'Today’s observance'}</Text>
                 {data.festivals.map((festival) => (
                   <Text key={festival} style={styles.festivalText}>✦ {festival}</Text>
                 ))}
@@ -209,8 +210,8 @@ export default function TodayScreen() {
           </ScrollView>
 
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Details</Text>
-            <Text style={styles.swipeHint}>పంచాంగం • ముహూర్తం • సంకల్పం</Text>
+            <Text style={styles.sectionTitle}>{telugu ? 'వివరాలు' : 'Details'}</Text>
+            <Text style={styles.swipeHint}>{telugu ? 'పంచాంగం • ముహూర్తం • సంకల్పం' : 'Panchangam • Muhurta • Sankalpam'}</Text>
           </View>
 
           <ScrollView
@@ -220,10 +221,10 @@ export default function TodayScreen() {
             snapToInterval={RAIL_SNAP_INTERVAL}
             contentContainerStyle={styles.cardRail}
           >
-            <DetailPanel title="పంచాంగ సారాంశం" subtitle="Panchangam" lines={primaryDayLines(data)} style={styles.railCard} />
-            <DetailPanel title="ముఖ్య సమయాలు" subtitle="Muhurta" lines={muhurtaLines(data)} style={styles.railCard} />
+            <DetailPanel title={telugu ? 'పంచాంగ సారాంశం' : 'Panchangam'} subtitle={telugu ? 'Panchangam' : 'Daily summary'} lines={primaryDayLines(data, language)} style={styles.railCard} />
+            <DetailPanel title={telugu ? 'ముఖ్య సమయాలు' : 'Important times'} subtitle={telugu ? 'Muhurta' : 'Muhurta'} lines={muhurtaLines(data, language)} style={styles.railCard} />
             <Card style={[styles.sankalpamCard, styles.railCard]}>
-              <Text style={styles.panelTitle}>సంకల్పం</Text>
+              <Text style={styles.panelTitle}>{telugu ? 'సంకల్పం' : 'Sankalpam'}</Text>
               <Text style={styles.sankalpamText}>{data.sankalpam}</Text>
             </Card>
           </ScrollView>
@@ -231,19 +232,21 @@ export default function TodayScreen() {
       </View>
       <SettingsModal
         citySlug={city.slug}
+        language={language}
         onClose={() => setSettingsOpen(false)}
         onSelectCity={(slug) => {
           const nextCity = PANCHANGAM_CITIES.find((candidate) => candidate.slug === slug);
           if (nextCity) setCity(nextCity);
           setSettingsOpen(false);
         }}
+        onSelectLanguage={setLanguage}
         visible={settingsOpen}
       />
     </ScrollView>
   );
 }
 
-function SettingsModal({ citySlug, onClose, onSelectCity, visible }: { citySlug: string; onClose: () => void; onSelectCity: (slug: string) => void; visible: boolean }) {
+function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLanguage, visible }: { citySlug: string; language: 'te' | 'en'; onClose: () => void; onSelectCity: (slug: string) => void; onSelectLanguage: (language: 'te' | 'en') => void; visible: boolean }) {
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.modalBackdrop}>
@@ -270,6 +273,11 @@ function SettingsModal({ citySlug, onClose, onSelectCity, visible }: { citySlug:
               </Pressable>
             );
           })}
+          <Text style={styles.settingLabel}>App language</Text>
+          <View style={styles.languageRow}>
+            <Pressable onPress={() => onSelectLanguage('te')} style={[styles.languageOption, language === 'te' && styles.languageOptionSelected]}><Text style={[styles.languageText, language === 'te' && styles.languageTextSelected]}>తెలుగు</Text></Pressable>
+            <Pressable onPress={() => onSelectLanguage('en')} style={[styles.languageOption, language === 'en' && styles.languageOptionSelected]}><Text style={[styles.languageText, language === 'en' && styles.languageTextSelected]}>English</Text></Pressable>
+          </View>
           <View style={styles.methodNote}>
             <Text style={styles.methodTitle}>Calculation profile</Text>
             <Text style={styles.methodText}>Drik Panchangam · Lahiri ayanamsha · sunrise-based Vedic day</Text>
@@ -380,6 +388,11 @@ const styles = StyleSheet.create({
   cityMeta: { color: colors.muted, fontSize: 11, fontWeight: '600', marginTop: 1 },
   cityMetaSelected: { color: '#ffe7d8' },
   cityCheck: { color: colors.gold, fontSize: 18, fontWeight: '800' },
+  languageRow: { flexDirection: 'row', gap: 8, marginBottom: 7 },
+  languageOption: { flex: 1, minHeight: 44, borderRadius: 12, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
+  languageOptionSelected: { backgroundColor: colors.maroon, borderColor: colors.maroon },
+  languageText: { color: colors.ink, fontSize: 13, fontWeight: '800' },
+  languageTextSelected: { color: colors.white },
   methodNote: { borderRadius: 14, backgroundColor: colors.peach, marginTop: 7, padding: 12 },
   methodTitle: { color: colors.maroon, fontSize: 12, fontWeight: '800' },
   methodText: { color: colors.ink, fontSize: 12, lineHeight: 18, marginTop: 3 },
