@@ -17,12 +17,20 @@ import { colors } from '../theme';
 // stacking context, and setting it deep inside here (below the form's own
 // root View) never reached the level where it needed to outrank the
 // submit button.
-export function PlaceInput({ initialLabel, onSelect }: { initialLabel: string; onSelect: (place: Place) => void }) {
+export function PlaceInput({ initialLabel, onSelect, onDropdownVisibleChange }: { initialLabel: string; onSelect: (place: Place) => void; onDropdownVisibleChange?: (visible: boolean) => void }) {
   const [query, setQuery] = useState(initialLabel);
   const [results, setResults] = useState<Place[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownVisible = open && results.length > 0;
+
+  // Lets the parent form hide content that sits below this field (e.g. a
+  // hint line) while the dropdown is open, instead of it visually
+  // colliding with the overlay.
+  useEffect(() => {
+    onDropdownVisibleChange?.(dropdownVisible);
+  }, [dropdownVisible, onDropdownVisibleChange]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -57,7 +65,7 @@ export function PlaceInput({ initialLabel, onSelect }: { initialLabel: string; o
         style={styles.input}
       />
       {loading && <ActivityIndicator size="small" color={colors.maroon} style={styles.spinner} />}
-      {open && results.length > 0 && (
+      {dropdownVisible && (
         <View style={styles.dropdown}>
           {results.map((place) => (
             <Pressable

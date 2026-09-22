@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import type { BirthDetails } from '../api/jyotisha';
 import type { Place } from '../api/places';
@@ -15,7 +16,12 @@ export const HYDERABAD_BIRTH_DETAILS: BirthDetails = {
   place_label: 'Hyderabad, Telangana, India',
 };
 
-export function BirthDetailsFields({ details, onChange, title }: { details: BirthDetails; onChange: (next: BirthDetails) => void; title?: string }) {
+export function BirthDetailsFields({ details, onChange, title, onPlaceDropdownVisibleChange }: { details: BirthDetails; onChange: (next: BirthDetails) => void; title?: string; onPlaceDropdownVisibleChange?: (visible: boolean) => void }) {
+  const [placeDropdownOpen, setPlaceDropdownOpen] = useState(false);
+  const handleDropdownVisibleChange = (visible: boolean) => {
+    setPlaceDropdownOpen(visible);
+    onPlaceDropdownVisibleChange?.(visible);
+  };
   return (
     <View style={styles.wrap}>
       {title && <Text style={styles.title}>{title}</Text>}
@@ -48,10 +54,11 @@ export function BirthDetailsFields({ details, onChange, title }: { details: Birt
           onSelect={(place: Place) =>
             onChange({ ...details, place_label: place.label, latitude: String(place.latitude), longitude: String(place.longitude) })
           }
+          onDropdownVisibleChange={handleDropdownVisibleChange}
         />
       </View>
 
-      <Text style={styles.hint}>Timezone: Asia/Kolkata</Text>
+      <Text style={[styles.hint, placeDropdownOpen && styles.hintHidden]}>Timezone: Asia/Kolkata</Text>
     </View>
   );
 }
@@ -69,4 +76,5 @@ const styles = StyleSheet.create({
   label: { color: colors.muted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.25 },
   input: { minHeight: 44, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.white, paddingHorizontal: 12, color: colors.ink, fontSize: 15 },
   hint: { color: colors.muted, fontSize: 11, marginTop: 1 },
+  hintHidden: { opacity: 0 },
 });

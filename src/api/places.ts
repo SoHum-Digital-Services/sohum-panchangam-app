@@ -23,9 +23,8 @@ interface NominatimResult {
 }
 
 // This app's users are overwhelmingly searching for Indian birthplaces
-// (a Telangana temple's community), so India-scoped results are queried
-// first and always sort ahead of the rest -- not a hard restriction,
-// since someone can still be born elsewhere.
+// (a Telangana temple's community), so India is searched first and only
+// falls back to a worldwide search if India has nothing matching.
 const PRIORITY_COUNTRY_CODE = 'in';
 
 async function nominatimSearch(query: string, countrycodes?: string): Promise<NominatimResult[]> {
@@ -45,45 +44,43 @@ function toPlace(r: NominatimResult): { place: Place; city: string } | null {
   return { place: { label, latitude: Number(r.lat), longitude: Number(r.lon) }, city };
 }
 
-export async function searchPlaces(query: string): Promise<Place[]> {
-  const trimmed = query.trim();
-  if (trimmed.length < 3) return [];
-
-  // Priority-country results first, then a broader fallback search topped
-  // up only if the priority search came up short.
-  const priorityResults = await nominatimSearch(trimmed, PRIORITY_COUNTRY_CODE);
-  const combined = [...priorityResults];
-  if (priorityResults.length < 5) {
-    combined.push(...(await nominatimSearch(trimmed)));
-  }
-
-  // Nominatim returns neighbourhoods, development authorities, urban/rural
-  // splits of the same city, etc. Keep only results that resolve to an
-  // actual city/town/village, and build a clean "City, State, Country"
-  // label ourselves instead of Nominatim's noisy full address string --
-  // that also naturally dedupes the "Foo (Urban)" / "Foo (Rural)" pairs.
+// Nominatim's own relevance ranking is fuzzy (substring/token matches
+// anywhere in the address, not just the city name), which is how a search
+// for "nalg" was surfacing places with no real connection to what was
+// typed. This app wants plain autocomplete behavior: only city names that
+// literally start with what's been typed so far, narrowing as more is
+// typed -- so filtering (not just sorting) happens here, client-side,
+// regardless of what Nominatim itself considered relevant.
+function toCandidates(results: NominatimResult[], query: string): Array<{ place: Place; city: string }> {
+  const q = query.toLowerCase();
   const seen = new Set<string>();
   const candidates: Array<{ place: Place; city: string }> = [];
-  for (const r of combined) {
+  for (const r of results) {
     const converted = toPlace(r);
     if (!converted) continue;
+    if (!converted.city.toLowerCase().startsWith(q)) continue;
     const key = converted.place.label.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
     candidates.push(converted);
   }
+  return candidates;
+}
 
-  // City names starting with what was typed ("Hyder..." -> "Hyderabad")
-  // rank above ones that merely contain it, matching normal autocomplete
-  // behavior; priority-country order (already first in `candidates`,
-  // since combined starts with priorityResults) is preserved within each
-  // group via a stable sort.
-  const q = trimmed.toLowerCase();
-  candidates.sort((a, b) => {
-    const aStarts = a.city.toLowerCase().startsWith(q) ? 0 : 1;
-    const bStarts = b.city.toLowerCase().startsWith(q) ? 0 : 1;
-    return aStarts - bStarts;
-  });
+export async function searchPlaces(query: string): Promise<Place[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 3) return [];
+
+  const priorityResults = await nominatimSearch(trimmed, PRIORITY_COUNTRY_CODE);
+  let candidates = toCandidates(priorityResults, trimmed);
+
+  // Only reach outside India if India genuinely has no prefix match --
+  // not just "fewer than N results" (that's what let unrelated foreign
+  // places sneak in before).
+  if (candidates.length === 0) {
+    const worldResults = await nominatimSearch(trimmed);
+    candidates = toCandidates(worldResults, trimmed);
+  }
 
   return candidates.slice(0, 6).map((c) => c.place);
 }
