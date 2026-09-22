@@ -57,10 +57,18 @@ export default function TodayScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.maroon} />}
     >
       <View style={styles.header}>
-        <Text style={styles.brand}>SoHum పంచాంగం</Text>
+        <View style={styles.brandRow}>
+          <View style={styles.logoBadge}>
+            <Text style={styles.logoBadgeText}>ఓం</Text>
+          </View>
+          <Text style={styles.brand}>SoHum పంచాంగం</Text>
+        </View>
         <Text style={styles.location}>⌖ {CHERUVUGATTU.name_te}, {CHERUVUGATTU.name_en}</Text>
-        <Text style={styles.vara}>{data.vara.name_te}</Text>
-        <Text style={styles.date}>{formatDateLong(data.date)}</Text>
+
+        <View style={styles.dayNav}>
+          <Text style={styles.vara}>{data.vara.name_te}</Text>
+          <Text style={styles.date}>{formatDateLong(data.date)}</Text>
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -148,11 +156,15 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.cream },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.cream, padding: 24 },
   errorText: { color: colors.maroon, textAlign: 'center' },
-  header: { backgroundColor: colors.maroon, paddingTop: 60, paddingBottom: 24, paddingHorizontal: 18 },
+  header: { backgroundColor: colors.maroon, paddingTop: 56, paddingBottom: 32, paddingHorizontal: 20 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  logoBadge: { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.saffron, alignItems: 'center', justifyContent: 'center' },
+  logoBadgeText: { color: colors.maroon, fontWeight: '900', fontSize: 15 },
   brand: { color: colors.white, fontWeight: '800', fontSize: 18 },
-  location: { color: '#ffe1ce', marginTop: 6, fontWeight: '700' },
-  vara: { color: '#ffe1ce', textAlign: 'center', marginTop: 16, fontWeight: '800' },
-  date: { color: colors.white, textAlign: 'center', fontSize: 22, fontWeight: '700', marginTop: 2 },
+  location: { color: '#ffe1ce', marginTop: 12, fontWeight: '700' },
+  dayNav: { alignItems: 'center', marginTop: 24, gap: 4 },
+  vara: { color: '#ffe1ce', fontWeight: '800' },
+  date: { color: colors.white, fontSize: 22, fontWeight: '700' },
   content: { padding: 16, gap: 12 },
   heroCard: { backgroundColor: colors.maroonLight, borderColor: colors.maroonLight },
   heroLabel: { color: '#ffe1ce', fontWeight: '800', fontSize: 12, textTransform: 'uppercase' },
