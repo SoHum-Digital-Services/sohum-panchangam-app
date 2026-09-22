@@ -105,30 +105,30 @@ export default function TodayScreen() {
 
           <View style={styles.datePanel}>
             <View pointerEvents="none" style={styles.panelGlow} />
-            <View style={styles.dayNav}>
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="Previous day"
-                activeOpacity={0.65}
-                onPress={goPreviousDay}
-                style={[styles.arrowButton, styles.leftArrowButton]}
-              >
-                <Text style={styles.arrowText}>‹</Text>
-              </TouchableOpacity>
-              <View pointerEvents="none" style={styles.dayTitle}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Previous day"
+              activeOpacity={0.65}
+              onPress={goPreviousDay}
+              style={[styles.arrowButton, styles.leftArrowButton]}
+            >
+              <Text style={styles.arrowText}>‹</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Next day"
+              activeOpacity={0.65}
+              onPress={goNextDay}
+              style={[styles.arrowButton, styles.rightArrowButton]}
+            >
+              <Text style={styles.arrowText}>›</Text>
+            </TouchableOpacity>
+            <View pointerEvents="none" style={styles.dayNav}>
+              <View style={styles.dayTitle}>
                 <Text style={styles.vara}>{data.vara.name_te}</Text>
                 <Text style={styles.date}>{formatDateLong(data.date)}</Text>
                 <Text style={styles.monthLine}>{data.lunar_month.name_te} · {pakshaTe(data.tithi.paksha)} పక్షం</Text>
               </View>
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="Next day"
-                activeOpacity={0.65}
-                onPress={goNextDay}
-                style={[styles.arrowButton, styles.rightArrowButton]}
-              >
-                <Text style={styles.arrowText}>›</Text>
-              </TouchableOpacity>
             </View>
 
             <View style={styles.dateStrip}>
@@ -267,12 +267,12 @@ const styles = StyleSheet.create({
   settingsDot: { width: 34, height: 34, borderRadius: 12, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
   settingsDotText: { color: colors.maroon },
   pressedControl: { opacity: 0.72 },
-  datePanel: { marginTop: 14, borderRadius: 24, padding: 13, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 16, elevation: 3 },
+  datePanel: { marginTop: 14, borderRadius: 24, padding: 13, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 16, elevation: 3, position: 'relative' },
   panelGlow: { position: 'absolute', width: 160, height: 160, borderRadius: 80, right: -54, top: -72, backgroundColor: '#ffffff12' },
-  dayNav: { minHeight: 74, alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 2 },
-  arrowButton: { position: 'absolute', top: 13, width: 54, height: 48, borderRadius: 16, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center', zIndex: 10, elevation: 10 },
-  leftArrowButton: { left: 0 },
-  rightArrowButton: { right: 0 },
+  dayNav: { minHeight: 74, width: '100%', alignItems: 'center', justifyContent: 'center', zIndex: 2 },
+  arrowButton: { position: 'absolute', top: 20, width: 72, height: 64, borderRadius: 18, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center', zIndex: 20, elevation: 20 },
+  leftArrowButton: { left: 13 },
+  rightArrowButton: { right: 13 },
   arrowText: { color: colors.white, fontSize: 28, lineHeight: 30 },
   dayTitle: { width: '100%', alignItems: 'center', paddingHorizontal: 62 },
   vara: { color: colors.gold, fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
