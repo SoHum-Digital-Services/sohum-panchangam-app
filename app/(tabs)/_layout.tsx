@@ -4,7 +4,7 @@ import { colors } from '../../src/theme';
 
 function TabIcon({ symbol, focused }: { symbol: string; focused: boolean }) {
   return (
-    <Text style={{ fontSize: 20, color: focused ? colors.maroon : colors.muted }}>
+    <Text style={{ fontSize: 20, color: focused ? colors.maroon : colors.muted, opacity: focused ? 1 : 0.72 }}>
       {symbol}
     </Text>
   );
@@ -17,7 +17,19 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.maroon,
         tabBarInactiveTintColor: colors.muted,
-        tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.line },
+        tabBarLabelStyle: { fontWeight: '800', fontSize: 11 },
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.line,
+          height: 72,
+          paddingTop: 8,
+          paddingBottom: 10,
+          shadowColor: '#5b2a10',
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.08,
+          shadowRadius: 16,
+          elevation: 8,
+        },
       }}
     >
       <Tabs.Screen
