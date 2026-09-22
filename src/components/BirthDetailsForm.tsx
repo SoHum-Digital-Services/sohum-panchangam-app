@@ -57,7 +57,13 @@ export function BirthDetailsFields({ details, onChange, title }: { details: Birt
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 9 },
+  // zIndex here, not deeper inside PlaceInput, is what actually matters:
+  // this View is the direct sibling of the submit button inside the
+  // Card that hosts both (see horoscope.tsx/compatibility.tsx). zIndex
+  // only ranks elements within the same stacking context -- setting it
+  // on a descendant several levels down never reaches the level where it
+  // needs to outrank the button.
+  wrap: { gap: 9, zIndex: 10 },
   title: { color: colors.ink, fontSize: 16, fontWeight: '800', marginBottom: 1 },
   field: { gap: 4 },
   label: { color: colors.muted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.25 },
