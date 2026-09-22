@@ -8,11 +8,9 @@ import { colors } from '../../src/theme';
 import { addDays, formatDateLong, formatDateParts, formatTime, isoDate } from '../../src/format';
 import { muhurtaLines, pakshaTe, primaryDayLines, weekdayShort } from '../../src/panchangamUi';
 import { PANCHANGAM_CITIES, usePanchangamSettings } from '../../src/settings';
+import { railStyles, RAIL_SNAP_INTERVAL } from '../../src/rail';
 
 const TODAY = isoDate(new Date());
-const RAIL_CARD_WIDTH = 312;
-const RAIL_GAP = 12;
-const RAIL_SNAP_INTERVAL = RAIL_CARD_WIDTH + RAIL_GAP;
 
 export default function TodayScreen() {
   const { city, setCity, language, setLanguage } = usePanchangamSettings();
@@ -69,8 +67,6 @@ export default function TodayScreen() {
       </View>
     );
   }
-
-  const parts = formatDateParts(data.date);
 
   return (
     <ScrollView
@@ -160,9 +156,9 @@ export default function TodayScreen() {
             showsHorizontalScrollIndicator={false}
             decelerationRate="fast"
             snapToInterval={RAIL_SNAP_INTERVAL}
-            contentContainerStyle={styles.cardRail}
+            contentContainerStyle={railStyles.cardRail}
           >
-            <Card style={[styles.heroCard, styles.railCard]}>
+            <Card style={[styles.heroCard, railStyles.railCard]}>
               <View style={styles.heroTopRow}>
                 <View style={styles.heroCopy}>
                   <Text style={styles.heroLabel}>{telugu ? 'ఈరోజు తిథి' : 'Today’s tithi'}</Text>
@@ -186,24 +182,34 @@ export default function TodayScreen() {
               </View>
             </Card>
 
-            <View style={[styles.moonDateRow, styles.railCard]}>
-              <View style={styles.moonBadge}>
-                <Text style={styles.moonIcon}>◐</Text>
+            <Card style={[styles.moonCard, railStyles.railCard]}>
+              <View style={styles.heroTopRow}>
+                <View style={styles.heroCopy}>
+                  <Text style={styles.heroLabel}>{telugu ? 'చంద్రుడు' : 'Moon'}</Text>
+                  <Text style={styles.heroValue}>{telugu ? data.moon_rashi.name_te : data.moon_rashi.name_en}</Text>
+                  <Text style={styles.heroSub}>{telugu ? 'రాశి' : 'Rashi'}</Text>
+                </View>
+                <View style={railStyles.moonBadge}>
+                  <Text style={railStyles.moonIcon}>◐</Text>
+                </View>
               </View>
-              <View style={styles.dateBlock}>
-                <Text style={styles.dateBlockDay}>{parts.day}<Text style={styles.dateBlockMonth}> {parts.month}</Text></Text>
-                <Text style={styles.dateBlockWeek}>{parts.weekday.toUpperCase()}</Text>
-                <View style={styles.dateBlockDivider} />
-                <Text style={styles.dateBlockTithi}>{data.tithi.index} {telugu ? (data.tithi.paksha === 'Shukla' ? 'శుక్ల' : 'బహుళ') : data.tithi.paksha}</Text>
-                <Text style={styles.dateBlockMonthLine}>{telugu ? data.lunar_month.name_te : data.lunar_month.name_en}</Text>
+              <View style={styles.sunGrid}>
+                <View style={styles.sunChip}>
+                  <Text style={styles.cardLabel}>🌙 {telugu ? 'చంద్రోదయం' : 'Moonrise'}</Text>
+                  <Text style={styles.compactValue}>{formatTime(data.moonrise)}</Text>
+                </View>
+                <View style={styles.sunChip}>
+                  <Text style={styles.cardLabel}>🌑 {telugu ? 'చంద్రాస్తమయం' : 'Moonset'}</Text>
+                  <Text style={styles.compactValue}>{formatTime(data.moonset)}</Text>
+                </View>
               </View>
-            </View>
+            </Card>
 
             {data.festivals.length > 0 && (
-              <Card style={[styles.festivalCard, styles.railCard]}>
-                <Text style={styles.panelTitle}>{telugu ? 'ఈరోజు విశేషం' : 'Today’s observance'}</Text>
+              <Card style={[railStyles.festivalCard, railStyles.railCard]}>
+                <Text style={railStyles.panelTitle}>{telugu ? 'ఈరోజు విశేషం' : 'Today’s observance'}</Text>
                 {data.festivals.map((festival) => (
-                  <Text key={festival} style={styles.festivalText}>✦ {festival}</Text>
+                  <Text key={festival} style={railStyles.festivalText}>✦ {festival}</Text>
                 ))}
               </Card>
             )}
@@ -219,13 +225,13 @@ export default function TodayScreen() {
             showsHorizontalScrollIndicator={false}
             decelerationRate="fast"
             snapToInterval={RAIL_SNAP_INTERVAL}
-            contentContainerStyle={styles.cardRail}
+            contentContainerStyle={railStyles.cardRail}
           >
-            <DetailPanel title={telugu ? 'పంచాంగ సారాంశం' : 'Panchangam'} subtitle={telugu ? 'Panchangam' : 'Daily summary'} lines={primaryDayLines(data, language)} style={styles.railCard} />
-            <DetailPanel title={telugu ? 'ముఖ్య సమయాలు' : 'Important times'} subtitle={telugu ? 'Muhurta' : 'Muhurta'} lines={muhurtaLines(data, language)} style={styles.railCard} />
-            <Card style={[styles.sankalpamCard, styles.railCard]}>
-              <Text style={styles.panelTitle}>{telugu ? 'సంకల్పం' : 'Sankalpam'}</Text>
-              <Text style={styles.sankalpamText}>{data.sankalpam}</Text>
+            <DetailPanel title={telugu ? 'పంచాంగ సారాంశం' : 'Panchangam'} subtitle={telugu ? 'Panchangam' : 'Daily summary'} lines={primaryDayLines(data, language)} style={railStyles.railCard} />
+            <DetailPanel title={telugu ? 'ముఖ్య సమయాలు' : 'Important times'} subtitle={telugu ? 'Muhurta' : 'Muhurta'} lines={muhurtaLines(data, language)} style={railStyles.railCard} />
+            <Card style={[railStyles.sankalpamCard, railStyles.railCard]}>
+              <Text style={railStyles.panelTitle}>{telugu ? 'సంకల్పం' : 'Sankalpam'}</Text>
+              <Text style={railStyles.sankalpamText}>{data.sankalpam}</Text>
             </Card>
           </ScrollView>
         </View>
@@ -291,12 +297,12 @@ function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLang
 function DetailPanel({ title, subtitle, lines, style }: { title: string; subtitle: string; lines: Array<{ label: string; value: string }>; style?: ViewStyle }) {
   return (
     <Card style={[styles.detailPanel, style]}>
-      <Text style={styles.panelTitle}>{title}</Text>
-      <Text style={styles.panelSubtitle}>{subtitle}</Text>
+      <Text style={railStyles.panelTitle}>{title}</Text>
+      <Text style={railStyles.panelSubtitle}>{subtitle}</Text>
       {lines.map((line) => (
-        <View key={line.label} style={styles.detailLine}>
-          <Text style={styles.detailLabel}>{line.label}</Text>
-          <Text style={styles.detailValue}>{line.value}</Text>
+        <View key={line.label} style={railStyles.detailLine}>
+          <Text style={railStyles.detailLabel}>{line.label}</Text>
+          <Text style={railStyles.detailValue}>{line.value}</Text>
         </View>
       ))}
     </Card>
@@ -338,9 +344,8 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 18, marginTop: 2 },
   sectionTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
   swipeHint: { color: colors.muted, fontSize: 11, fontWeight: '700' },
-  cardRail: { paddingHorizontal: 16, gap: RAIL_GAP, paddingVertical: 6 },
-  railCard: { width: RAIL_CARD_WIDTH, height: 194 },
   heroCard: { backgroundColor: colors.card, borderColor: colors.line, padding: 14 },
+  moonCard: { backgroundColor: colors.card, borderColor: colors.line, padding: 14 },
   heroTopRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   heroCopy: { flex: 1 },
   heroLabel: { color: colors.orange, fontWeight: '800', fontSize: 11, letterSpacing: 0.3 },
@@ -353,26 +358,7 @@ const styles = StyleSheet.create({
   sunChip: { flex: 1, borderRadius: 14, backgroundColor: colors.peach, paddingVertical: 9, paddingHorizontal: 10 },
   cardLabel: { color: colors.muted, fontWeight: '700', fontSize: 11 },
   compactValue: { color: colors.ink, fontSize: 16, fontWeight: '800', marginTop: 3 },
-  moonDateRow: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: colors.card, borderRadius: 18, borderWidth: 1, borderColor: colors.line, padding: 14, shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 1 },
-  moonBadge: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
-  moonIcon: { color: '#dfe3ea', fontSize: 28 },
-  dateBlock: { flex: 1 },
-  dateBlockDay: { color: colors.maroon, fontSize: 28, fontWeight: '800', letterSpacing: -0.4 },
-  dateBlockMonth: { fontSize: 20 },
-  dateBlockWeek: { color: colors.ink, fontSize: 13, fontWeight: '800' },
-  dateBlockDivider: { width: 56, height: 2, backgroundColor: colors.saffron, marginVertical: 6 },
-  dateBlockTithi: { color: colors.orange, fontSize: 21, fontWeight: '800' },
-  dateBlockMonthLine: { color: colors.ink, fontWeight: '700', fontSize: 13, marginTop: 1 },
   detailPanel: { gap: 6, padding: 14 },
-  panelTitle: { color: colors.ink, fontSize: 17, fontWeight: '800' },
-  panelSubtitle: { color: colors.muted, fontWeight: '600', fontSize: 12, marginTop: -2, marginBottom: 3 },
-  detailLine: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', paddingVertical: 2 },
-  detailLabel: { width: 78, color: colors.orange, fontWeight: '800', fontSize: 12 },
-  detailValue: { flex: 1, color: colors.ink, fontSize: 13, lineHeight: 18, fontWeight: '500' },
-  festivalCard: { backgroundColor: colors.peach, borderColor: '#ffd7b8' },
-  festivalText: { color: colors.maroon, fontWeight: '700', fontSize: 13, marginTop: 7 },
-  sankalpamCard: { borderLeftWidth: 4, borderLeftColor: colors.saffron },
-  sankalpamText: { color: colors.ink, fontSize: 13, lineHeight: 20, marginTop: 7 },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#291a1370' },
   settingsSheet: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28 },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },

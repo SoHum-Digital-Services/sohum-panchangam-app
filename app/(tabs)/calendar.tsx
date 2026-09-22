@@ -9,11 +9,9 @@ import { formatDateParts, formatTime, isoDate } from '../../src/format';
 import { buildMonthGrid, monthBounds, MONTH_NAMES, WEEKDAY_LABELS } from '../../src/monthGrid';
 import { calendarMarkers, muhurtaLines, pakshaTe, primaryDayLines } from '../../src/panchangamUi';
 import { usePanchangamSettings } from '../../src/settings';
+import { railStyles, RAIL_SNAP_INTERVAL } from '../../src/rail';
 
 const TODAY = isoDate(new Date());
-const RAIL_CARD_WIDTH = 312;
-const RAIL_GAP = 12;
-const RAIL_SNAP_INTERVAL = RAIL_CARD_WIDTH + RAIL_GAP;
 
 export default function CalendarScreen() {
   const { city } = usePanchangamSettings();
@@ -131,7 +129,7 @@ function SelectedDayDetails({ day }: { day: PanchangamResponse }) {
   return (
     <View style={styles.details}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{parts.day} {parts.month}</Text>
+        <Text style={styles.sectionTitle}>{parts.day} {parts.month} · {day.tithi.name_te}</Text>
         <Text style={styles.swipeHint}>Swipe details →</Text>
       </View>
 
@@ -140,36 +138,23 @@ function SelectedDayDetails({ day }: { day: PanchangamResponse }) {
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
         snapToInterval={RAIL_SNAP_INTERVAL}
-        contentContainerStyle={styles.cardRail}
+        contentContainerStyle={railStyles.cardRail}
       >
-        <View style={[styles.summaryRow, styles.railCard]}>
-          <View style={styles.moonBadge}>
-            <Text style={styles.moonIcon}>◐</Text>
-          </View>
-          <View style={styles.dateBlock}>
-            <Text style={styles.dateBlockDay}>{parts.day}<Text style={styles.dateBlockMonth}> {parts.month}</Text></Text>
-            <Text style={styles.dateBlockWeek}>{parts.weekday.toUpperCase()}</Text>
-            <View style={styles.dateBlockDivider} />
-            <Text style={styles.dateBlockTithi}>{day.tithi.index} {pakshaTe(day.tithi.paksha)}</Text>
-            <Text style={styles.dateBlockMonthLine}>{day.lunar_month.name_te}</Text>
-          </View>
-        </View>
-
-        <DetailCard title="పంచాంగం" lines={primaryDayLines(day)} style={styles.railCard} />
-        <DetailCard title="Auspicious/Inauspicious" lines={muhurtaLines(day)} style={styles.railCard} />
+        <DetailCard title="పంచాంగం" lines={primaryDayLines(day)} style={railStyles.railCard} />
+        <DetailCard title="Auspicious/Inauspicious" lines={muhurtaLines(day)} style={railStyles.railCard} />
 
         {day.festivals.length > 0 && (
-          <Card style={[styles.festivalCard, styles.railCard]}>
-            <Text style={styles.panelTitle}>పండుగలు</Text>
+          <Card style={[railStyles.festivalCard, railStyles.railCard]}>
+            <Text style={railStyles.panelTitle}>పండుగలు</Text>
             {day.festivals.map((festival) => (
-              <Text key={festival} style={styles.festivalText}>✦ {festival}</Text>
+              <Text key={festival} style={railStyles.festivalText}>✦ {festival}</Text>
             ))}
           </Card>
         )}
 
-        <Card style={[styles.sankalpamCard, styles.railCard]}>
-          <Text style={styles.panelTitle}>Sankalpam</Text>
-          <Text style={styles.sankalpamText}>{day.sankalpam}</Text>
+        <Card style={[railStyles.sankalpamCard, railStyles.railCard]}>
+          <Text style={railStyles.panelTitle}>Sankalpam</Text>
+          <Text style={railStyles.sankalpamText}>{day.sankalpam}</Text>
         </Card>
       </ScrollView>
     </View>
@@ -180,13 +165,13 @@ function DetailCard({ title, lines, style }: { title: string; lines: Array<{ lab
   return (
     <Card style={[styles.detailCard, style]}>
       <View style={styles.detailHeader}>
-        <Text style={styles.panelTitle}>{title}</Text>
+        <Text style={railStyles.panelTitle}>{title}</Text>
         <Text style={styles.infoDot}>ⓘ</Text>
       </View>
       {lines.map((line) => (
-        <View key={line.label} style={styles.detailLine}>
-          <Text style={styles.detailLabel}>{line.label}</Text>
-          <Text style={styles.detailValue}>{line.value}</Text>
+        <View key={line.label} style={railStyles.detailLine}>
+          <Text style={railStyles.detailLabel}>{line.label}</Text>
+          <Text style={railStyles.detailValue}>{line.value}</Text>
         </View>
       ))}
     </Card>
@@ -221,27 +206,7 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 18 },
   sectionTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
   swipeHint: { color: colors.muted, fontSize: 11, fontWeight: '700' },
-  cardRail: { paddingHorizontal: 16, gap: RAIL_GAP, paddingVertical: 6 },
-  railCard: { width: RAIL_CARD_WIDTH, height: 194 },
-  summaryRow: { flexDirection: 'row', gap: 12, alignItems: 'center', marginVertical: 2, backgroundColor: colors.card, borderRadius: 18, borderWidth: 1, borderColor: colors.line, padding: 14, shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 1 },
-  moonBadge: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
-  moonIcon: { color: '#dfe3ea', fontSize: 28 },
-  dateBlock: { flex: 1 },
-  dateBlockDay: { color: colors.maroon, fontSize: 28, fontWeight: '800', letterSpacing: -0.4 },
-  dateBlockMonth: { fontSize: 20 },
-  dateBlockWeek: { color: colors.ink, fontSize: 13, fontWeight: '800' },
-  dateBlockDivider: { width: 56, height: 2, backgroundColor: colors.saffron, marginVertical: 6 },
-  dateBlockTithi: { color: colors.orange, fontSize: 21, fontWeight: '800' },
-  dateBlockMonthLine: { color: colors.ink, fontWeight: '700', fontSize: 13, marginTop: 1 },
   detailCard: { gap: 6, padding: 14 },
   detailHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  panelTitle: { color: colors.ink, fontSize: 17, fontWeight: '800' },
   infoDot: { color: colors.muted, fontSize: 15 },
-  detailLine: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', paddingVertical: 2 },
-  detailLabel: { width: 82, color: colors.orange, fontSize: 12, fontWeight: '800' },
-  detailValue: { flex: 1, color: colors.ink, fontSize: 13, lineHeight: 18, fontWeight: '500' },
-  festivalCard: { backgroundColor: colors.peach, borderColor: '#ffd7b8' },
-  festivalText: { color: colors.maroon, fontWeight: '700', fontSize: 13, marginTop: 7 },
-  sankalpamCard: { borderLeftWidth: 4, borderLeftColor: colors.saffron },
-  sankalpamText: { color: colors.ink, fontSize: 13, lineHeight: 20, marginTop: 7 },
 });

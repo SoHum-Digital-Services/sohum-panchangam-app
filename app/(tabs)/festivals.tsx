@@ -11,11 +11,13 @@ import { usePanchangamSettings } from '../../src/settings';
 interface FestivalDay {
   date: string;
   name: string;
-  tithi: string;
+  tithi_en: string;
+  tithi_te: string;
 }
 
 export default function FestivalsScreen() {
-  const { city } = usePanchangamSettings();
+  const { city, language } = usePanchangamSettings();
+  const telugu = language === 'te';
   const now = new Date();
   const [items, setItems] = useState<FestivalDay[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export default function FestivalsScreen() {
       const festivalDays: FestivalDay[] = [];
       for (const day of days) {
         for (const name of day.festivals) {
-          festivalDays.push({ date: day.date, name, tithi: day.tithi.name_en });
+          festivalDays.push({ date: day.date, name, tithi_en: day.tithi.name_en, tithi_te: day.tithi.name_te });
         }
       }
       setItems(festivalDays);
@@ -47,9 +49,9 @@ export default function FestivalsScreen() {
     <View style={styles.screen}>
       <View style={styles.appFrame}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>SoHum పంచాంగం</Text>
-          <Text style={styles.title}>పండుగలు</Text>
-          <Text style={styles.subtitle}>{MONTH_NAMES[now.getMonth()]} {now.getFullYear()} · {city.name_en}</Text>
+          <Text style={styles.eyebrow}>{telugu ? 'SoHum పంచాంగం' : 'SoHum Panchangam'}</Text>
+          <Text style={styles.title}>{telugu ? 'పండుగలు' : 'Festivals'}</Text>
+          <Text style={styles.subtitle}>{MONTH_NAMES[now.getMonth()]} {now.getFullYear()} · {telugu ? city.name_te : city.name_en}</Text>
         </View>
 
         {error && <Text style={styles.errorText}>{error}</Text>}
@@ -63,14 +65,14 @@ export default function FestivalsScreen() {
             contentContainerStyle={styles.list}
             ListEmptyComponent={
               <Card style={styles.emptyCard}>
-                <Text style={styles.emptyText}>No named festivals in the reference data for this month.</Text>
+                <Text style={styles.emptyText}>{telugu ? 'ఈ నెలకు రిఫరెన్స్ డేటాలో పేరున్న పండుగలు లేవు.' : 'No named festivals in the reference data for this month.'}</Text>
               </Card>
             }
             renderItem={({ item }) => (
               <Card style={styles.card}>
                 <Text style={styles.date}>{item.date}</Text>
                 <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.tithi}>{item.tithi}</Text>
+                <Text style={styles.tithi}>{telugu ? item.tithi_te : item.tithi_en}</Text>
               </Card>
             )}
           />

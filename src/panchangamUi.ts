@@ -46,12 +46,14 @@ export function primaryDayLines(day: PanchangamResponse, language: AppLanguage =
 export function muhurtaLines(day: PanchangamResponse, language: AppLanguage = 'te'): Array<{ label: string; value: string }> {
   const m = day.muhurta;
   const te = language === 'te';
+  const to = te ? 'నుండి' : 'to';
+  const span = (window: { starts_at: string; ends_at: string }) => `${formatTime(window.starts_at)} ${to} ${formatTime(window.ends_at)}`;
   return [
-    { label: te ? 'రాహు కాలం' : 'Rahu Kalam', value: `${formatTime(m.rahu_kalam.starts_at)} to ${formatTime(m.rahu_kalam.ends_at)}` },
-    { label: te ? 'యమగండం' : 'Yamagandam', value: `${formatTime(m.yamagandam.starts_at)} to ${formatTime(m.yamagandam.ends_at)}` },
-    { label: te ? 'గుళికా కాలం' : 'Gulika Kalam', value: `${formatTime(m.gulika_kalam.starts_at)} to ${formatTime(m.gulika_kalam.ends_at)}` },
-    { label: te ? 'అభిజిత్' : 'Abhijit', value: `${formatTime(m.abhijit.starts_at)} to ${formatTime(m.abhijit.ends_at)}` },
-    { label: te ? 'బ్రహ్మ ముహూర్తం' : 'Brahma Muhurta', value: `${formatTime(m.brahma_muhurtam.starts_at)} to ${formatTime(m.brahma_muhurtam.ends_at)}` },
-    { label: te ? 'ప్రదోష కాలం' : 'Pradosham', value: `${formatTime(m.pradosha_kalam.starts_at)} to ${formatTime(m.pradosha_kalam.ends_at)}` },
+    { label: te ? 'రాహు కాలం' : 'Rahu Kalam', value: span(m.rahu_kalam) },
+    { label: te ? 'యమగండం' : 'Yamagandam', value: span(m.yamagandam) },
+    { label: te ? 'గుళికా కాలం' : 'Gulika Kalam', value: span(m.gulika_kalam) },
+    { label: te ? 'అభిజిత్' : 'Abhijit', value: span(m.abhijit) },
+    { label: te ? 'బ్రహ్మ ముహూర్తం' : 'Brahma Muhurta', value: span(m.brahma_muhurtam) },
+    { label: te ? 'ప్రదోష కాలం' : 'Pradosham', value: span(m.pradosha_kalam) },
   ];
 }
