@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { CHERUVUGATTU, fetchPanchangam } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
@@ -114,68 +114,93 @@ export default function TodayScreen() {
         </View>
 
         <View style={styles.content}>
-          <Card style={styles.heroCard}>
-            <View style={styles.heroTopRow}>
-              <View style={styles.heroCopy}>
-                <Text style={styles.heroLabel}>ఈరోజు తిథి</Text>
-                <Text style={styles.heroValue}>{data.tithi.name_en}</Text>
-                <Text style={styles.heroSub}>{data.tithi.name_te} · {data.tithi.paksha} Paksha</Text>
-                <Text style={styles.heroSmall}>Ends {formatTime(data.tithi.ends_at)}</Text>
-              </View>
-              <View style={styles.heroMoon}>
-                <Text style={styles.heroMoonText}>◐</Text>
-              </View>
-            </View>
-            <View style={styles.sunGrid}>
-              <View style={styles.sunChip}>
-                <Text style={styles.cardLabel}>🌅 సూర్యోదయం</Text>
-                <Text style={styles.compactValue}>{formatTime(data.sunrise)}</Text>
-              </View>
-              <View style={styles.sunChip}>
-                <Text style={styles.cardLabel}>🌇 సూర్యాస్తమయం</Text>
-                <Text style={styles.compactValue}>{formatTime(data.sunset)}</Text>
-              </View>
-            </View>
-          </Card>
-
-          <View style={styles.moonDateRow}>
-            <View style={styles.moonBadge}>
-              <Text style={styles.moonIcon}>◐</Text>
-            </View>
-            <View style={styles.dateBlock}>
-              <Text style={styles.dateBlockDay}>{parts.day}<Text style={styles.dateBlockMonth}> {parts.month}</Text></Text>
-              <Text style={styles.dateBlockWeek}>{parts.weekday.toUpperCase()}</Text>
-              <View style={styles.dateBlockDivider} />
-              <Text style={styles.dateBlockTithi}>{data.tithi.index} {data.tithi.paksha === 'Shukla' ? 'శుక్ల' : 'బహుళ'}</Text>
-              <Text style={styles.dateBlockMonthLine}>{data.lunar_month.name_te}</Text>
-            </View>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Today</Text>
+            <Text style={styles.swipeHint}>Swipe cards →</Text>
           </View>
 
-          <DetailPanel title="పంచాంగ సారాంశం" subtitle="Panchangam" lines={primaryDayLines(data)} />
-          <DetailPanel title="ముఖ్య సమయాలు" subtitle="Muhurta" lines={muhurtaLines(data)} />
-
-          {data.festivals.length > 0 && (
-            <Card style={styles.festivalCard}>
-              <Text style={styles.panelTitle}>ఈరోజు విశేషం</Text>
-              {data.festivals.map((festival) => (
-                <Text key={festival} style={styles.festivalText}>✦ {festival}</Text>
-              ))}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            decelerationRate="fast"
+            snapToInterval={344}
+            contentContainerStyle={styles.cardRail}
+          >
+            <Card style={[styles.heroCard, styles.railCard]}>
+              <View style={styles.heroTopRow}>
+                <View style={styles.heroCopy}>
+                  <Text style={styles.heroLabel}>ఈరోజు తిథి</Text>
+                  <Text style={styles.heroValue}>{data.tithi.name_en}</Text>
+                  <Text style={styles.heroSub}>{data.tithi.name_te} · {data.tithi.paksha} Paksha</Text>
+                  <Text style={styles.heroSmall}>Ends {formatTime(data.tithi.ends_at)}</Text>
+                </View>
+                <View style={styles.heroMoon}>
+                  <Text style={styles.heroMoonText}>◐</Text>
+                </View>
+              </View>
+              <View style={styles.sunGrid}>
+                <View style={styles.sunChip}>
+                  <Text style={styles.cardLabel}>🌅 సూర్యోదయం</Text>
+                  <Text style={styles.compactValue}>{formatTime(data.sunrise)}</Text>
+                </View>
+                <View style={styles.sunChip}>
+                  <Text style={styles.cardLabel}>🌇 సూర్యాస్తమయం</Text>
+                  <Text style={styles.compactValue}>{formatTime(data.sunset)}</Text>
+                </View>
+              </View>
             </Card>
-          )}
 
-          <Card style={styles.sankalpamCard}>
-            <Text style={styles.panelTitle}>సంకల్పం</Text>
-            <Text style={styles.sankalpamText}>{data.sankalpam}</Text>
-          </Card>
+            <View style={[styles.moonDateRow, styles.railCard]}>
+              <View style={styles.moonBadge}>
+                <Text style={styles.moonIcon}>◐</Text>
+              </View>
+              <View style={styles.dateBlock}>
+                <Text style={styles.dateBlockDay}>{parts.day}<Text style={styles.dateBlockMonth}> {parts.month}</Text></Text>
+                <Text style={styles.dateBlockWeek}>{parts.weekday.toUpperCase()}</Text>
+                <View style={styles.dateBlockDivider} />
+                <Text style={styles.dateBlockTithi}>{data.tithi.index} {data.tithi.paksha === 'Shukla' ? 'శుక్ల' : 'బహుళ'}</Text>
+                <Text style={styles.dateBlockMonthLine}>{data.lunar_month.name_te}</Text>
+              </View>
+            </View>
+
+            {data.festivals.length > 0 && (
+              <Card style={[styles.festivalCard, styles.railCard]}>
+                <Text style={styles.panelTitle}>ఈరోజు విశేషం</Text>
+                {data.festivals.map((festival) => (
+                  <Text key={festival} style={styles.festivalText}>✦ {festival}</Text>
+                ))}
+              </Card>
+            )}
+          </ScrollView>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Details</Text>
+            <Text style={styles.swipeHint}>పంచాంగం • ముహూర్తం • సంకల్పం</Text>
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            decelerationRate="fast"
+            snapToInterval={344}
+            contentContainerStyle={styles.cardRail}
+          >
+            <DetailPanel title="పంచాంగ సారాంశం" subtitle="Panchangam" lines={primaryDayLines(data)} style={styles.railCard} />
+            <DetailPanel title="ముఖ్య సమయాలు" subtitle="Muhurta" lines={muhurtaLines(data)} style={styles.railCard} />
+            <Card style={[styles.sankalpamCard, styles.railCard]}>
+              <Text style={styles.panelTitle}>సంకల్పం</Text>
+              <Text style={styles.sankalpamText}>{data.sankalpam}</Text>
+            </Card>
+          </ScrollView>
         </View>
       </View>
     </ScrollView>
   );
 }
 
-function DetailPanel({ title, subtitle, lines }: { title: string; subtitle: string; lines: Array<{ label: string; value: string }> }) {
+function DetailPanel({ title, subtitle, lines, style }: { title: string; subtitle: string; lines: Array<{ label: string; value: string }>; style?: ViewStyle }) {
   return (
-    <Card style={styles.detailPanel}>
+    <Card style={[styles.detailPanel, style]}>
       <Text style={styles.panelTitle}>{title}</Text>
       <Text style={styles.panelSubtitle}>{subtitle}</Text>
       {lines.map((line) => (
@@ -194,7 +219,7 @@ const styles = StyleSheet.create({
   appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: colors.cream },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.cream, padding: 24 },
   errorText: { color: colors.maroon, textAlign: 'center' },
-  header: { backgroundColor: colors.cream, paddingTop: 54, paddingBottom: 12, paddingHorizontal: 16 },
+  header: { backgroundColor: colors.cream, paddingTop: 46, paddingBottom: 10, paddingHorizontal: 16 },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   logoBadge: { width: 44, height: 44, borderRadius: 15, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.18, shadowRadius: 12, elevation: 3 },
   logoBadgeText: { color: colors.maroon, fontWeight: '900', fontSize: 18 },
@@ -203,7 +228,7 @@ const styles = StyleSheet.create({
   location: { color: colors.muted, marginTop: 4, fontWeight: '700', fontSize: 12 },
   settingsDot: { width: 36, height: 36, borderRadius: 13, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
   settingsDotText: { color: colors.maroon },
-  datePanel: { marginTop: 22, borderRadius: 28, padding: 16, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 14 }, shadowOpacity: 0.22, shadowRadius: 24, elevation: 4 },
+  datePanel: { marginTop: 18, borderRadius: 28, padding: 15, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 14 }, shadowOpacity: 0.22, shadowRadius: 24, elevation: 4 },
   panelGlow: { position: 'absolute', width: 160, height: 160, borderRadius: 80, right: -54, top: -72, backgroundColor: '#ffffff12' },
   dayNav: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   arrowButton: { width: 40, height: 40, borderRadius: 14, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center' },
@@ -212,13 +237,18 @@ const styles = StyleSheet.create({
   vara: { color: colors.gold, fontWeight: '900', letterSpacing: 0.4 },
   date: { color: colors.white, fontSize: 21, fontWeight: '900', marginTop: 3, textAlign: 'center', lineHeight: 27 },
   monthLine: { color: '#ffe7d8', marginTop: 5, fontWeight: '700', textAlign: 'center' },
-  dateStrip: { flexDirection: 'row', gap: 8, marginTop: 18 },
-  datePill: { flex: 1, minHeight: 58, borderRadius: 17, borderWidth: 1, borderColor: '#ffffff21', backgroundColor: '#ffffff10', alignItems: 'center', justifyContent: 'center' },
+  dateStrip: { flexDirection: 'row', gap: 8, marginTop: 15 },
+  datePill: { flex: 1, minHeight: 54, borderRadius: 17, borderWidth: 1, borderColor: '#ffffff21', backgroundColor: '#ffffff10', alignItems: 'center', justifyContent: 'center' },
   datePillActive: { backgroundColor: colors.card, borderColor: colors.card },
   datePillWeekday: { color: '#f5cfb5', fontWeight: '900', fontSize: 12 },
   datePillDay: { color: '#f5cfb5', fontWeight: '900', fontSize: 20, marginTop: 2 },
   datePillTextActive: { color: colors.maroon },
-  content: { padding: 16, gap: 14, paddingBottom: 32 },
+  content: { paddingVertical: 10, gap: 10, paddingBottom: 24 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 18, marginTop: 2 },
+  sectionTitle: { color: colors.ink, fontSize: 18, fontWeight: '900' },
+  swipeHint: { color: colors.muted, fontSize: 12, fontWeight: '800' },
+  cardRail: { paddingHorizontal: 16, gap: 12, paddingVertical: 8 },
+  railCard: { width: 332, minHeight: 214 },
   heroCard: { backgroundColor: colors.card, borderColor: colors.line, padding: 18 },
   heroTopRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   heroCopy: { flex: 1 },
@@ -232,7 +262,7 @@ const styles = StyleSheet.create({
   sunChip: { flex: 1, borderRadius: 18, backgroundColor: colors.peach, paddingVertical: 12, paddingHorizontal: 12 },
   cardLabel: { color: colors.muted, fontWeight: '800', fontSize: 12 },
   compactValue: { color: colors.ink, fontSize: 18, fontWeight: '900', marginTop: 4 },
-  moonDateRow: { flexDirection: 'row', gap: 14, alignItems: 'center', marginTop: 2, backgroundColor: colors.card, borderRadius: 24, borderWidth: 1, borderColor: colors.line, padding: 14 },
+  moonDateRow: { flexDirection: 'row', gap: 14, alignItems: 'center', backgroundColor: colors.card, borderRadius: 24, borderWidth: 1, borderColor: colors.line, padding: 16, shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 18, elevation: 2 },
   moonBadge: { width: 80, height: 80, borderRadius: 22, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
   moonIcon: { color: '#dfe3ea', fontSize: 50 },
   dateBlock: { flex: 1 },
