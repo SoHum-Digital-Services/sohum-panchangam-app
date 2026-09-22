@@ -47,7 +47,12 @@ export default function CalendarScreen() {
     if (month === 11) { setYear((y) => y + 1); setMonth(0); } else { setMonth((m) => m + 1); }
   };
 
-  const grid = useMemo(() => buildMonthGrid(year, month), [year, month]);
+  const weeks = useMemo(() => {
+    const cells = buildMonthGrid(year, month);
+    const rows = [];
+    for (let i = 0; i < cells.length; i += 7) rows.push(cells.slice(i, i + 7));
+    return rows;
+  }, [year, month]);
   const selected = days?.[selectedDate];
 
   return (
@@ -79,29 +84,33 @@ export default function CalendarScreen() {
             <ActivityIndicator color={colors.orange} style={{ marginTop: 24, marginBottom: 24 }} />
           ) : (
             <View style={styles.grid}>
-              {grid.map((cell, i) => {
-                if (!cell.date) return <View key={i} style={styles.cell} />;
-                const dayData = days?.[cell.date];
-                const markers = calendarMarkers(dayData);
-                const isToday = cell.date === TODAY;
-                const isSelected = cell.date === selectedDate;
-                return (
-                  <Pressable
-                    key={i}
-                    style={[styles.cell, isSelected && styles.cellSelected]}
-                    onPress={() => setSelectedDate(cell.date!)}
-                  >
-                    <Text style={[styles.cellDay, isToday && styles.cellDayToday, isSelected && styles.cellDaySelected]}>
-                      {cell.day}
-                    </Text>
-                    <View style={styles.markerRow}>
-                      {markers.map((marker, index) => (
-                        <Text key={`${marker}-${index}`} style={[styles.marker, isSelected && styles.markerSelected]}>{marker}</Text>
-                      ))}
-                    </View>
-                  </Pressable>
-                );
-              })}
+              {weeks.map((week, weekIndex) => (
+                <View key={weekIndex} style={styles.calendarRow}>
+                  {week.map((cell, dayIndex) => {
+                    if (!cell.date) return <View key={dayIndex} style={styles.cell} />;
+                    const dayData = days?.[cell.date];
+                    const markers = calendarMarkers(dayData);
+                    const isToday = cell.date === TODAY;
+                    const isSelected = cell.date === selectedDate;
+                    return (
+                      <Pressable
+                        key={cell.date}
+                        style={[styles.cell, isSelected && styles.cellSelected]}
+                        onPress={() => setSelectedDate(cell.date!)}
+                      >
+                        <Text style={[styles.cellDay, isToday && styles.cellDayToday, isSelected && styles.cellDaySelected]}>
+                          {cell.day}
+                        </Text>
+                        <View style={styles.markerRow}>
+                          {markers.map((marker, index) => (
+                            <Text key={`${marker}-${index}`} style={[styles.marker, isSelected && styles.markerSelected]}>{marker}</Text>
+                          ))}
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ))}
             </View>
           )}
         </View>
@@ -192,8 +201,9 @@ const styles = StyleSheet.create({
   calendarCard: { marginHorizontal: 16, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, borderRadius: 22, padding: 9, shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 1 },
   weekRow: { flexDirection: 'row', paddingHorizontal: 2, paddingTop: 3, paddingBottom: 7 },
   weekdayLabel: { flex: 1, textAlign: 'center', color: colors.muted, fontWeight: '800', fontSize: 11, letterSpacing: 0.2 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 4 },
-  cell: { width: `${100 / 7}%`, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.grid, borderWidth: 2, borderColor: colors.card, borderRadius: 12 },
+  grid: { gap: 4 },
+  calendarRow: { flexDirection: 'row', gap: 4 },
+  cell: { flex: 1, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.grid, borderRadius: 12 },
   cellSelected: { backgroundColor: colors.maroon },
   cellDay: { fontSize: 15, color: colors.ink, fontWeight: '700' },
   cellDayToday: { color: colors.orange, fontWeight: '800' },
