@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { searchPlaces, type Place } from '../api/places';
 import { colors } from '../theme';
+import { usePanchangamSettings } from '../settings';
 
 // Type-ahead place search replacing manual latitude/longitude entry --
 // matches the pattern every other horoscope app uses. Selecting a result
@@ -18,6 +19,8 @@ import { colors } from '../theme';
 // root View) never reached the level where it needed to outrank the
 // submit button.
 export function PlaceInput({ initialLabel, onSelect, onDropdownVisibleChange }: { initialLabel: string; onSelect: (place: Place) => void; onDropdownVisibleChange?: (visible: boolean) => void }) {
+  const { language } = usePanchangamSettings();
+  const telugu = language === 'te';
   const [query, setQuery] = useState(initialLabel);
   const [results, setResults] = useState<Place[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,7 +63,7 @@ export function PlaceInput({ initialLabel, onSelect, onDropdownVisibleChange }: 
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        placeholder="Start typing a city or town"
+        placeholder={telugu ? 'ఒక నగరం లేదా పట్టణం పేరు టైప్ చేయండి' : 'Start typing a city or town'}
         placeholderTextColor="#ab9989"
         style={styles.input}
       />

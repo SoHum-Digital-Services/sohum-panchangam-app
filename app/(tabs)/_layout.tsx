@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
 import { colors } from '../../src/theme';
+import { usePanchangamSettings } from '../../src/settings';
 
 function TabIcon({ symbol, focused }: { symbol: string; focused: boolean }) {
   return (
@@ -11,6 +12,8 @@ function TabIcon({ symbol, focused }: { symbol: string; focused: boolean }) {
 }
 
 export default function TabsLayout() {
+  const { language } = usePanchangamSettings();
+  const telugu = language === 'te';
   return (
     <Tabs
       screenOptions={{
@@ -35,35 +38,35 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'ఈరోజు',
+          title: telugu ? 'ఈరోజు' : 'Today',
           tabBarIcon: ({ focused }) => <TabIcon symbol="☀" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="calendar"
         options={{
-          title: 'క్యాలెండర్',
+          title: telugu ? 'క్యాలెండర్' : 'Calendar',
           tabBarIcon: ({ focused }) => <TabIcon symbol="▦" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="festivals"
         options={{
-          title: 'పండుగలు',
+          title: telugu ? 'పండుగలు' : 'Festivals',
           tabBarIcon: ({ focused }) => <TabIcon symbol="🪔" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="temple"
         options={{
-          title: 'ఆలయం',
+          title: telugu ? 'ఆలయం' : 'Temple',
           tabBarIcon: ({ focused }) => <TabIcon symbol="🛕" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="more"
         options={{
-          title: 'మరిన్ని',
+          title: telugu ? 'మరిన్ని' : 'More',
           tabBarIcon: ({ focused }) => <TabIcon symbol="⋯" focused={focused} />,
         }}
       />

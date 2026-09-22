@@ -256,20 +256,21 @@ export default function TodayScreen() {
 }
 
 function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLanguage, visible }: { citySlug: string; language: 'te' | 'en'; onClose: () => void; onSelectCity: (slug: string) => void; onSelectLanguage: (language: 'te' | 'en') => void; visible: boolean }) {
+  const telugu = language === 'te';
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.modalBackdrop}>
         <View style={styles.settingsSheet}>
           <View style={styles.sheetHeader}>
             <View>
-              <Text style={styles.sheetEyebrow}>Panchangam settings</Text>
-              <Text style={styles.sheetTitle}>స్థానం & పద్ధతి</Text>
+              <Text style={styles.sheetEyebrow}>{telugu ? 'పంచాంగం సెట్టింగులు' : 'Panchangam settings'}</Text>
+              <Text style={styles.sheetTitle}>{telugu ? 'స్థానం & పద్ధతి' : 'Location & method'}</Text>
             </View>
             <Pressable accessibilityRole="button" accessibilityLabel="Close settings" hitSlop={8} onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>×</Text>
             </Pressable>
           </View>
-          <Text style={styles.settingLabel}>Calculation location</Text>
+          <Text style={styles.settingLabel}>{telugu ? 'గణన స్థానం' : 'Calculation location'}</Text>
           {PANCHANGAM_CITIES.map((candidate) => {
             const selected = candidate.slug === citySlug;
             return (
@@ -282,14 +283,14 @@ function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLang
               </Pressable>
             );
           })}
-          <Text style={styles.settingLabel}>App language</Text>
+          <Text style={styles.settingLabel}>{telugu ? 'యాప్ భాష' : 'App language'}</Text>
           <View style={styles.languageRow}>
             <Pressable onPress={() => onSelectLanguage('te')} style={[styles.languageOption, language === 'te' && styles.languageOptionSelected]}><Text style={[styles.languageText, language === 'te' && styles.languageTextSelected]}>తెలుగు</Text></Pressable>
             <Pressable onPress={() => onSelectLanguage('en')} style={[styles.languageOption, language === 'en' && styles.languageOptionSelected]}><Text style={[styles.languageText, language === 'en' && styles.languageTextSelected]}>English</Text></Pressable>
           </View>
           <View style={styles.methodNote}>
-            <Text style={styles.methodTitle}>Calculation profile</Text>
-            <Text style={styles.methodText}>Drik Panchangam · Lahiri ayanamsha · sunrise-based Vedic day</Text>
+            <Text style={styles.methodTitle}>{telugu ? 'గణన ప్రొఫైల్' : 'Calculation profile'}</Text>
+            <Text style={styles.methodText}>{telugu ? 'దృక్ పంచాంగం · లాహిరి అయనాంశ · సూర్యోదయ ఆధారిత వైదిక దినం' : 'Drik Panchangam · Lahiri ayanamsha · sunrise-based Vedic day'}</Text>
           </View>
         </View>
       </View>

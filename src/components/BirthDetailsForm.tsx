@@ -6,6 +6,7 @@ import { colors } from '../theme';
 import { DateInput } from './DateInput';
 import { PlaceInput } from './PlaceInput';
 import { TimeInput } from './TimeInput';
+import { usePanchangamSettings } from '../settings';
 
 export const HYDERABAD_BIRTH_DETAILS: BirthDetails = {
   name: '',
@@ -17,6 +18,8 @@ export const HYDERABAD_BIRTH_DETAILS: BirthDetails = {
 };
 
 export function BirthDetailsFields({ details, onChange, title, onPlaceDropdownVisibleChange }: { details: BirthDetails; onChange: (next: BirthDetails) => void; title?: string; onPlaceDropdownVisibleChange?: (visible: boolean) => void }) {
+  const { language } = usePanchangamSettings();
+  const telugu = language === 'te';
   const [placeDropdownOpen, setPlaceDropdownOpen] = useState(false);
   const handleDropdownVisibleChange = (visible: boolean) => {
     setPlaceDropdownOpen(visible);
@@ -27,28 +30,28 @@ export function BirthDetailsFields({ details, onChange, title, onPlaceDropdownVi
       {title && <Text style={styles.title}>{title}</Text>}
 
       <View style={styles.field}>
-        <Text style={styles.label}>Name</Text>
+        <Text style={styles.label}>{telugu ? 'పేరు' : 'Name'}</Text>
         <TextInput
           value={details.name}
           onChangeText={(value) => onChange({ ...details, name: value })}
-          placeholder="Name"
+          placeholder={telugu ? 'పేరు' : 'Name'}
           placeholderTextColor="#ab9989"
           style={styles.input}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Date of birth</Text>
+        <Text style={styles.label}>{telugu ? 'జన్మ తేదీ' : 'Date of birth'}</Text>
         <DateInput value={details.birth_date} onChange={(birth_date) => onChange({ ...details, birth_date })} />
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Exact birth time</Text>
+        <Text style={styles.label}>{telugu ? 'కచ్చితమైన జన్మ సమయం' : 'Exact birth time'}</Text>
         <TimeInput value={details.birth_time} onChange={(birth_time) => onChange({ ...details, birth_time })} />
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Place of birth</Text>
+        <Text style={styles.label}>{telugu ? 'జన్మ స్థలం' : 'Place of birth'}</Text>
         <PlaceInput
           initialLabel={details.place_label}
           onSelect={(place: Place) =>
@@ -58,7 +61,7 @@ export function BirthDetailsFields({ details, onChange, title, onPlaceDropdownVi
         />
       </View>
 
-      <Text style={[styles.hint, placeDropdownOpen && styles.hintHidden]}>Timezone: Asia/Kolkata</Text>
+      <Text style={[styles.hint, placeDropdownOpen && styles.hintHidden]}>{telugu ? 'టైమ్‌జోన్: ఆసియా/కోల్‌కతా' : 'Timezone: Asia/Kolkata'}</Text>
     </View>
   );
 }
