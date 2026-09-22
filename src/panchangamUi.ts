@@ -9,6 +9,19 @@ export function weekdayShort(dateStr: string, language: AppLanguage = 'te'): str
   return weekdayTeShort[new Date(`${dateStr}T00:00:00`).getDay()];
 }
 
+// Single source of truth for card titles that appear on more than one
+// screen (Today's "Details" rail, Calendar's day-detail rail), so the same
+// content is never labeled two different things depending which tab you're on.
+export function panchangamCardTitle(telugu: boolean): string {
+  return telugu ? 'పంచాంగం' : 'Panchangam';
+}
+export function muhurtaCardTitle(telugu: boolean): string {
+  return telugu ? 'ముహూర్తం' : 'Muhurta';
+}
+export function sankalpamCardTitle(telugu: boolean): string {
+  return telugu ? 'సంకల్పం' : 'Sankalpam';
+}
+
 export function pakshaTe(paksha: string): string {
   if (paksha === 'Shukla') return 'శుక్ల';
   if (paksha === 'Bahula' || paksha === 'Krishna') return 'బహుళ';

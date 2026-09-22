@@ -1,20 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { fetchPanchangam } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
 import { Card } from '../../src/components/Card';
+import { DetailCard } from '../../src/components/DetailCard';
 import { colors } from '../../src/theme';
 import { addDays, formatDateLong, formatDateParts, formatTime, isoDate } from '../../src/format';
-import { muhurtaLines, pakshaTe, primaryDayLines, weekdayShort } from '../../src/panchangamUi';
+import { muhurtaCardTitle, muhurtaLines, pakshaTe, panchangamCardTitle, primaryDayLines, sankalpamCardTitle, weekdayShort } from '../../src/panchangamUi';
 import { PANCHANGAM_CITIES, usePanchangamSettings } from '../../src/settings';
-import { railStyles, RAIL_SNAP_INTERVAL } from '../../src/rail';
+import { railStyles, useRailMetrics } from '../../src/rail';
 
 const TODAY = isoDate(new Date());
 
 export default function TodayScreen() {
   const { city, setCity, language, setLanguage } = usePanchangamSettings();
   const telugu = language === 'te';
+  const { cardWidth, snapInterval } = useRailMetrics();
+  const railCard = { width: cardWidth };
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [cache, setCache] = useState<Record<string, PanchangamResponse>>({});
   const [error, setError] = useState<string | null>(null);
@@ -155,10 +158,10 @@ export default function TodayScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             decelerationRate="fast"
-            snapToInterval={RAIL_SNAP_INTERVAL}
+            snapToInterval={snapInterval}
             contentContainerStyle={railStyles.cardRail}
           >
-            <Card style={[styles.heroCard, railStyles.railCard]}>
+            <Card style={[styles.heroCard, railCard]}>
               <View style={styles.heroTopRow}>
                 <View style={styles.heroCopy}>
                   <Text style={styles.heroLabel}>{telugu ? 'ఈరోజు తిథి' : 'Today’s tithi'}</Text>
@@ -182,7 +185,7 @@ export default function TodayScreen() {
               </View>
             </Card>
 
-            <Card style={[styles.moonCard, railStyles.railCard]}>
+            <Card style={[styles.moonCard, railCard]}>
               <View style={styles.heroTopRow}>
                 <View style={styles.heroCopy}>
                   <Text style={styles.heroLabel}>{telugu ? 'చంద్రుడు' : 'Moon'}</Text>
@@ -206,7 +209,7 @@ export default function TodayScreen() {
             </Card>
 
             {data.festivals.length > 0 && (
-              <Card style={[railStyles.festivalCard, railStyles.railCard]}>
+              <Card style={[railStyles.festivalCard, railCard]}>
                 <Text style={railStyles.panelTitle}>{telugu ? 'ఈరోజు విశేషం' : 'Today’s observance'}</Text>
                 {data.festivals.map((festival) => (
                   <Text key={festival} style={railStyles.festivalText}>✦ {festival}</Text>
@@ -217,20 +220,20 @@ export default function TodayScreen() {
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{telugu ? 'వివరాలు' : 'Details'}</Text>
-            <Text style={styles.swipeHint}>{telugu ? 'పంచాంగం • ముహూర్తం • సంకల్పం' : 'Panchangam • Muhurta • Sankalpam'}</Text>
+            <Text style={styles.swipeHint}>{telugu ? 'కార్డులను స్వైప్ చేయండి →' : 'Swipe cards →'}</Text>
           </View>
 
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             decelerationRate="fast"
-            snapToInterval={RAIL_SNAP_INTERVAL}
+            snapToInterval={snapInterval}
             contentContainerStyle={railStyles.cardRail}
           >
-            <DetailPanel title={telugu ? 'పంచాంగ సారాంశం' : 'Panchangam'} subtitle={telugu ? 'Panchangam' : 'Daily summary'} lines={primaryDayLines(data, language)} style={railStyles.railCard} />
-            <DetailPanel title={telugu ? 'ముఖ్య సమయాలు' : 'Important times'} subtitle={telugu ? 'Muhurta' : 'Muhurta'} lines={muhurtaLines(data, language)} style={railStyles.railCard} />
-            <Card style={[railStyles.sankalpamCard, railStyles.railCard]}>
-              <Text style={railStyles.panelTitle}>{telugu ? 'సంకల్పం' : 'Sankalpam'}</Text>
+            <DetailCard title={panchangamCardTitle(telugu)} lines={primaryDayLines(data, language)} style={railCard} />
+            <DetailCard title={muhurtaCardTitle(telugu)} lines={muhurtaLines(data, language)} style={railCard} />
+            <Card style={[railStyles.sankalpamCard, railCard]}>
+              <Text style={railStyles.panelTitle}>{sankalpamCardTitle(telugu)}</Text>
               <Text style={railStyles.sankalpamText}>{data.sankalpam}</Text>
             </Card>
           </ScrollView>
@@ -294,21 +297,6 @@ function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLang
   );
 }
 
-function DetailPanel({ title, subtitle, lines, style }: { title: string; subtitle: string; lines: Array<{ label: string; value: string }>; style?: ViewStyle }) {
-  return (
-    <Card style={[styles.detailPanel, style]}>
-      <Text style={railStyles.panelTitle}>{title}</Text>
-      <Text style={railStyles.panelSubtitle}>{subtitle}</Text>
-      {lines.map((line) => (
-        <View key={line.label} style={railStyles.detailLine}>
-          <Text style={railStyles.detailLabel}>{line.label}</Text>
-          <Text style={railStyles.detailValue}>{line.value}</Text>
-        </View>
-      ))}
-    </Card>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.creamDeep },
   shell: { alignItems: 'center', minHeight: '100%' },
@@ -358,7 +346,6 @@ const styles = StyleSheet.create({
   sunChip: { flex: 1, borderRadius: 14, backgroundColor: colors.peach, paddingVertical: 9, paddingHorizontal: 10 },
   cardLabel: { color: colors.muted, fontWeight: '700', fontSize: 11 },
   compactValue: { color: colors.ink, fontSize: 16, fontWeight: '800', marginTop: 3 },
-  detailPanel: { gap: 6, padding: 14 },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#291a1370' },
   settingsSheet: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28 },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },

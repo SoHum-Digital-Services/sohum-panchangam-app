@@ -3,9 +3,13 @@ import { ActivityIndicator, FlatList, Linking, Pressable, StyleSheet, Text, View
 import { useFocusEffect } from 'expo-router';
 import { fetchSevas, TEMPLE_BOOKING_URL, type Seva } from '../../src/api/temple';
 import { Card } from '../../src/components/Card';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { colors } from '../../src/theme';
+import { usePanchangamSettings } from '../../src/settings';
 
 export default function TempleScreen() {
+  const { language } = usePanchangamSettings();
+  const telugu = language === 'te';
   const [sevas, setSevas] = useState<Seva[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,14 +32,15 @@ export default function TempleScreen() {
   return (
     <View style={styles.screen}>
       <View style={styles.appFrame}>
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>Temple sevas</Text>
-          <Text style={styles.title}>చెరువుగట్టు దేవస్థానం</Text>
-          <Text style={styles.subtitle}>Sri Parvathi Jadala Ramalingeshwara Swamy Devasthanam</Text>
+        <ScreenHeader
+          eyebrow={telugu ? 'ఆలయ సేవలు' : 'Temple sevas'}
+          title={telugu ? 'చెరువుగట్టు దేవస్థానం' : 'Cheruvugattu Devasthanam'}
+          subtitle={telugu ? 'శ్రీ పార్వతీ జడల రామలింగేశ్వర స్వామి దేవస్థానం' : 'Sri Parvathi Jadala Ramalingeshwara Swamy Devasthanam'}
+        >
           <Pressable accessibilityRole="link" style={({ pressed }) => [styles.websiteButton, pressed && styles.websiteButtonPressed]} onPress={() => Linking.openURL(TEMPLE_BOOKING_URL)}>
             <Text style={styles.websiteButtonText}>Visit cheruvugattu.online ↗</Text>
           </Pressable>
-        </View>
+        </ScreenHeader>
 
         {error && (
           <Text style={styles.errorText}>
@@ -54,15 +59,15 @@ export default function TempleScreen() {
             renderItem={({ item }) => (
               <Card style={styles.card}>
                 <View style={styles.cardHeaderRow}>
-                  <Text style={styles.name}>{item.name_english}</Text>
+                  <Text style={styles.name}>{telugu ? item.name_telugu : item.name_english}</Text>
                   <Text style={styles.price}>₹{item.base_price}</Text>
                 </View>
-                <Text style={styles.nameTelugu}>{item.name_telugu}</Text>
-                <Text style={styles.description}>{item.description}</Text>
+                <Text style={styles.nameSecondary}>{telugu ? item.name_english : item.name_telugu}</Text>
+                <Text style={styles.description}>{telugu ? item.description_telugu : item.description}</Text>
                 <View style={styles.metaRow}>
-                  <Text style={styles.metaText}>{item.duration_minutes} min</Text>
-                  <Text style={styles.metaText}>Max {item.max_persons_per_ticket}/ticket</Text>
-                  {item.is_paroksha_available && <Text style={styles.metaText}>Paroksha available</Text>}
+                  <Text style={styles.metaText}>{item.duration_minutes} {telugu ? 'నిమి' : 'min'}</Text>
+                  <Text style={styles.metaText}>{telugu ? `గరిష్టం ${item.max_persons_per_ticket}` : `Max ${item.max_persons_per_ticket}/ticket`}</Text>
+                  {item.is_paroksha_available && <Text style={styles.metaText}>{telugu ? 'పరోక్ష సేవ' : 'Paroksha available'}</Text>}
                 </View>
                 {item.special_instructions ? (
                   <Text style={styles.instructions}>{item.special_instructions}</Text>
@@ -71,7 +76,7 @@ export default function TempleScreen() {
                   style={styles.bookButton}
                   onPress={() => Linking.openURL(`${TEMPLE_BOOKING_URL}/book/${item.id}`)}
                 >
-                  <Text style={styles.bookButtonText}>Book on cheruvugattu.online</Text>
+                  <Text style={styles.bookButtonText}>{telugu ? 'cheruvugattu.online లో బుక్ చేయండి' : 'Book on cheruvugattu.online'}</Text>
                 </Pressable>
               </Card>
             )}
@@ -85,10 +90,6 @@ export default function TempleScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, alignItems: 'center', backgroundColor: colors.creamDeep },
   appFrame: { width: '100%', maxWidth: 430, flex: 1, backgroundColor: colors.cream },
-  header: { margin: 16, marginTop: 48, borderRadius: 20, backgroundColor: colors.maroon, padding: 16 },
-  eyebrow: { color: colors.gold, fontWeight: '800', fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase' },
-  title: { fontSize: 22, fontWeight: '800', color: colors.white, marginTop: 5, lineHeight: 28 },
-  subtitle: { color: '#ffe7d8', marginTop: 5, fontSize: 12, lineHeight: 17, fontWeight: '600' },
   websiteButton: { alignSelf: 'flex-start', marginTop: 12, minHeight: 44, paddingHorizontal: 12, borderRadius: 12, justifyContent: 'center', backgroundColor: '#ffffff18', borderWidth: 1, borderColor: '#ffffff2e' },
   websiteButtonPressed: { backgroundColor: '#ffffff2b' },
   websiteButtonText: { color: colors.white, fontSize: 12, fontWeight: '800' },
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   name: { color: colors.ink, fontSize: 16, fontWeight: '800', flex: 1, marginRight: 8 },
   price: { color: colors.maroon, fontWeight: '800', fontSize: 14, backgroundColor: colors.maroonSoft, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999 },
-  nameTelugu: { color: colors.muted, marginTop: 3, fontWeight: '600', fontSize: 13 },
+  nameSecondary: { color: colors.muted, marginTop: 3, fontWeight: '600', fontSize: 13 },
   description: { color: colors.ink, marginTop: 8, fontSize: 13, lineHeight: 18 },
   metaRow: { flexDirection: 'row', gap: 12, marginTop: 10, flexWrap: 'wrap' },
   metaText: { color: colors.muted, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },

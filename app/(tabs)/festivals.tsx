@@ -4,6 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import { fetchPanchangamRange } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
 import { Card } from '../../src/components/Card';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { colors } from '../../src/theme';
 import { monthBounds, MONTH_NAMES } from '../../src/monthGrid';
 import { usePanchangamSettings } from '../../src/settings';
@@ -48,11 +49,11 @@ export default function FestivalsScreen() {
   return (
     <View style={styles.screen}>
       <View style={styles.appFrame}>
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>{telugu ? 'SoHum పంచాంగం' : 'SoHum Panchangam'}</Text>
-          <Text style={styles.title}>{telugu ? 'పండుగలు' : 'Festivals'}</Text>
-          <Text style={styles.subtitle}>{MONTH_NAMES[now.getMonth()]} {now.getFullYear()} · {telugu ? city.name_te : city.name_en}</Text>
-        </View>
+        <ScreenHeader
+          eyebrow={telugu ? 'SoHum పంచాంగం' : 'SoHum Panchangam'}
+          title={telugu ? 'పండుగలు' : 'Festivals'}
+          subtitle={`${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()} · ${telugu ? city.name_te : city.name_en}`}
+        />
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -85,10 +86,6 @@ export default function FestivalsScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, alignItems: 'center', backgroundColor: colors.creamDeep },
   appFrame: { width: '100%', maxWidth: 430, flex: 1, backgroundColor: colors.cream },
-  header: { margin: 16, marginTop: 48, borderRadius: 24, backgroundColor: colors.maroon, padding: 16, shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.14, shadowRadius: 16, elevation: 3 },
-  eyebrow: { color: colors.gold, fontWeight: '800', fontSize: 11, letterSpacing: 0.4 },
-  title: { fontSize: 26, fontWeight: '800', color: colors.white, marginTop: 5 },
-  subtitle: { color: '#ffe7d8', marginTop: 5, fontWeight: '600', fontSize: 13 },
   errorText: { color: colors.maroon, textAlign: 'center', padding: 16 },
   list: { padding: 16, paddingTop: 0, gap: 10, paddingBottom: 28 },
   card: { borderLeftWidth: 4, borderLeftColor: colors.saffron },

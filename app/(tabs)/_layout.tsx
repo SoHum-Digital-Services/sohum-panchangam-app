@@ -50,21 +50,21 @@ export default function TabsLayout() {
         name="festivals"
         options={{
           title: 'పండుగలు',
-          tabBarIcon: ({ focused }) => <TabIcon symbol="✦" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon symbol="🪔" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="temple"
         options={{
           title: 'ఆలయం',
-          tabBarIcon: ({ focused }) => <TabIcon symbol="🏛" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon symbol="🛕" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="more"
         options={{
           title: 'మరిన్ని',
-          tabBarIcon: ({ focused }) => <TabIcon symbol="☷" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon symbol="⋯" focused={focused} />,
         }}
       />
     </Tabs>
