@@ -43,6 +43,14 @@ export default function TodayScreen() {
     load(selectedDate, true);
   };
 
+  const goPreviousDay = useCallback(() => {
+    setSelectedDate((current) => addDays(current, -1));
+  }, []);
+
+  const goNextDay = useCallback(() => {
+    setSelectedDate((current) => addDays(current, 1));
+  }, []);
+
   const openSettings = () => {
     Alert.alert(
       'SoHum Panchangam',
@@ -101,13 +109,13 @@ export default function TodayScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Previous day"
-                hitSlop={12}
-                onPress={() => setSelectedDate(addDays(selectedDate, -1))}
+                hitSlop={18}
+                onPressIn={goPreviousDay}
                 style={({ pressed }) => [styles.arrowButton, pressed && styles.pressedControl]}
               >
                 <Text style={styles.arrowText}>‹</Text>
               </Pressable>
-              <View style={styles.dayTitle}>
+              <View pointerEvents="none" style={styles.dayTitle}>
                 <Text style={styles.vara}>{data.vara.name_te}</Text>
                 <Text style={styles.date}>{formatDateLong(data.date)}</Text>
                 <Text style={styles.monthLine}>{data.lunar_month.name_te} · {pakshaTe(data.tithi.paksha)} పక్షం</Text>
@@ -115,9 +123,9 @@ export default function TodayScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Next day"
-                hitSlop={12}
-                onPress={() => setSelectedDate(addDays(selectedDate, 1))}
-                style={({ pressed }) => [styles.arrowButton, pressed && styles.pressedControl]}
+                hitSlop={18}
+                onPressIn={goNextDay}
+                style={({ pressed }) => [styles.arrowButton, styles.nextArrowButton, pressed && styles.pressedControl]}
               >
                 <Text style={styles.arrowText}>›</Text>
               </Pressable>
@@ -261,8 +269,9 @@ const styles = StyleSheet.create({
   pressedControl: { opacity: 0.72 },
   datePanel: { marginTop: 14, borderRadius: 24, padding: 13, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 16, elevation: 3 },
   panelGlow: { position: 'absolute', width: 160, height: 160, borderRadius: 80, right: -54, top: -72, backgroundColor: '#ffffff12' },
-  dayNav: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  arrowButton: { width: 36, height: 36, borderRadius: 12, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center' },
+  dayNav: { flexDirection: 'row', alignItems: 'center', gap: 8, zIndex: 2 },
+  arrowButton: { width: 46, height: 46, borderRadius: 16, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center', zIndex: 5, elevation: 5 },
+  nextArrowButton: { marginRight: -4 },
   arrowText: { color: colors.white, fontSize: 28, lineHeight: 30 },
   dayTitle: { flex: 1, alignItems: 'center' },
   vara: { color: colors.gold, fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
