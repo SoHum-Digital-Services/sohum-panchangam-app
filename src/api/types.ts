@@ -57,10 +57,25 @@ export interface Muhurta {
   yamagandam: NamedPeriod;
   gulika_kalam: NamedPeriod;
   abhijit: NamedPeriod;
+  brahma_muhurtam: NamedPeriod;
+  pratah_sandhya: NamedPeriod;
+  madhyahna_sandhya: NamedPeriod;
+  sayam_sandhya: NamedPeriod;
+  pradosha_kalam: NamedPeriod;
+}
+
+export interface NamedCycle {
+  index: number;
+  name_en: string;
+  name_te: string;
 }
 
 export interface Varjyam extends NamedPeriod {
-  nakshatra: string;
+  // When Swiss-Lahiri computed, this is the nakshatra name. When sourced
+  // from the Mukteshwara reference workbook it's absent (that workbook
+  // doesn't record which nakshatra); source_text has the raw published row.
+  nakshatra?: string;
+  source_text?: string;
 }
 
 export interface PanchangamResponse {
@@ -82,4 +97,8 @@ export interface PanchangamResponse {
   varjyam: Varjyam[];
   source: { profile: string; note: string; month_system: string };
   festivals: string[];
+  samvatsara: NamedCycle;
+  ritu: NamedCycle;
+  ayana: NamedCycle;
+  sankalpam: string;
 }

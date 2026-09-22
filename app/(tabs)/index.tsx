@@ -101,12 +101,33 @@ export default function TodayScreen() {
           <LimbCard label="Yamagandam" value={`${formatTime(data.muhurta.yamagandam.starts_at)} – ${formatTime(data.muhurta.yamagandam.ends_at)}`} />
           <LimbCard label="Gulika Kalam" value={`${formatTime(data.muhurta.gulika_kalam.starts_at)} – ${formatTime(data.muhurta.gulika_kalam.ends_at)}`} />
           <LimbCard label="Abhijit" value={`${formatTime(data.muhurta.abhijit.starts_at)} – ${formatTime(data.muhurta.abhijit.ends_at)}`} />
+          <LimbCard label="Brahma Muhurtam" value={`${formatTime(data.muhurta.brahma_muhurtam.starts_at)} – ${formatTime(data.muhurta.brahma_muhurtam.ends_at)}`} />
+          <LimbCard label="Pratah Sandhya" value={`${formatTime(data.muhurta.pratah_sandhya.starts_at)} – ${formatTime(data.muhurta.pratah_sandhya.ends_at)}`} />
+          <LimbCard label="Madhyahna Sandhya" value={`${formatTime(data.muhurta.madhyahna_sandhya.starts_at)} – ${formatTime(data.muhurta.madhyahna_sandhya.ends_at)}`} />
+          <LimbCard label="Sayam Sandhya" value={`${formatTime(data.muhurta.sayam_sandhya.starts_at)} – ${formatTime(data.muhurta.sayam_sandhya.ends_at)}`} />
+          <LimbCard label="Pradosha Kalam" value={`${formatTime(data.muhurta.pradosha_kalam.starts_at)} – ${formatTime(data.muhurta.pradosha_kalam.ends_at)}`} />
         </View>
         {data.varjyam.length > 0 && (
           <Text style={styles.footnote}>
-            Varjyam: {data.varjyam.map((v) => `${formatTime(v.starts_at)}–${formatTime(v.ends_at)} (${v.nakshatra})`).join(', ')}
+            Varjyam: {data.varjyam
+              .map((v) => `${formatTime(v.starts_at)}–${formatTime(v.ends_at)}${v.nakshatra ? ` (${v.nakshatra})` : ''}`)
+              .join(', ')}
           </Text>
         )}
+
+        <Text style={styles.sectionEyebrow}>పంచాంగ వివరాలు</Text>
+        <Text style={styles.sectionHeading}>Samvatsara, Ritu &amp; Ayana</Text>
+        <View style={styles.limbGrid}>
+          <LimbCard label="Samvatsara" value={data.samvatsara.name_en} sub={data.samvatsara.name_te} />
+          <LimbCard label="Ritu" value={data.ritu.name_en} sub={data.ritu.name_te} />
+          <LimbCard label="Ayana" value={data.ayana.name_en} sub={data.ayana.name_te} />
+        </View>
+
+        <Text style={styles.sectionEyebrow}>సంకల్పం</Text>
+        <Text style={styles.sectionHeading}>Sankalpam</Text>
+        <Card>
+          <Text style={styles.sankalpamText}>{data.sankalpam}</Text>
+        </Card>
       </View>
     </ScrollView>
   );
@@ -152,4 +173,5 @@ const styles = StyleSheet.create({
   limbSub: { color: colors.muted, marginTop: 4 },
   limbNote: { color: colors.maroon, fontWeight: '700', marginTop: 8, fontSize: 12 },
   footnote: { color: colors.muted, fontSize: 12, marginTop: 4 },
+  sankalpamText: { color: colors.ink, fontSize: 14, lineHeight: 22 },
 });
