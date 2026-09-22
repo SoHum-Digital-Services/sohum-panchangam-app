@@ -1,6 +1,11 @@
 export const colors = {
   maroon: '#8f241e',
   maroonLight: '#a8492d',
+  orange: '#f05a18',
+  peach: '#fff3e9',
+  grid: '#f1f1f1',
+  dark: '#121820',
+  darkCard: '#202830',
   saffron: '#efbc45',
   ink: '#2a1c14',
   muted: '#8a7561',
