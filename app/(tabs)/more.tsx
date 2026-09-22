@@ -1,8 +1,7 @@
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from '../../src/components/Card';
 import { colors } from '../../src/theme';
-
-const BIRTH_CHART_URL = 'https://panchangam-eight.vercel.app/birth-chart';
 
 export default function MoreScreen() {
   return (
@@ -21,6 +20,7 @@ export default function MoreScreen() {
             subtitle="Horoscope"
             description="D1, divisional charts, Vimshottari, Yogini and Chara daśā."
             action="Open horoscope"
+            onPress={() => router.push('/horoscope')}
           />
           <FeatureCard
             icon="∞"
@@ -28,10 +28,12 @@ export default function MoreScreen() {
             subtitle="Marriage compatibility"
             description="Aṣṭakoota / Guna Milan with all eight kootas and dosha flags."
             action="Check compatibility"
+            onPress={() => router.push('/compatibility')}
           />
+          <FeatureCard icon="✦" title="శిశు జనన దోషం" subtitle="Gandamool / birth nakshatra" description="Gandamool status, birth nakshatra and traditional remedy guidance." action="Check Gandamool" onPress={() => router.push({ pathname: '/horoscope', params: { mode: 'doshas' } })} />
           <Card style={styles.noteCard}>
             <Text style={styles.noteTitle}>Built on your verified engine</Text>
-            <Text style={styles.noteText}>The calculator currently opens the complete customer-facing report. Native input and report screens are the next implementation step.</Text>
+            <Text style={styles.noteText}>These services run as native app pages. Entered birth details are sent only to your calculation API.</Text>
           </Card>
         </View>
       </View>
@@ -39,7 +41,7 @@ export default function MoreScreen() {
   );
 }
 
-function FeatureCard({ icon, title, subtitle, description, action }: { icon: string; title: string; subtitle: string; description: string; action: string }) {
+function FeatureCard({ icon, title, subtitle, description, action, onPress }: { icon: string; title: string; subtitle: string; description: string; action: string; onPress: () => void }) {
   return (
     <Card style={styles.featureCard}>
       <View style={styles.featureTop}>
@@ -50,7 +52,7 @@ function FeatureCard({ icon, title, subtitle, description, action }: { icon: str
         </View>
       </View>
       <Text style={styles.featureDescription}>{description}</Text>
-      <Pressable accessibilityRole="button" style={({ pressed }) => [styles.action, pressed && styles.actionPressed]} onPress={() => Linking.openURL(BIRTH_CHART_URL)}>
+      <Pressable accessibilityRole="button" style={({ pressed }) => [styles.action, pressed && styles.actionPressed]} onPress={onPress}>
         <Text style={styles.actionText}>{action} →</Text>
       </Pressable>
     </Card>

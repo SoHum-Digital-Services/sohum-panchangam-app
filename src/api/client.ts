@@ -1,6 +1,6 @@
 import type { PanchangamResponse } from './types';
 
-const BASE_URL = 'https://panchangam-eight.vercel.app';
+export const API_BASE_URL = 'https://panchangam-eight.vercel.app';
 
 export interface City {
   slug: string;
@@ -27,7 +27,7 @@ export async function fetchPanchangam(
     latitude: String(city.latitude),
     longitude: String(city.longitude),
   });
-  const res = await fetch(`${BASE_URL}/v1/panchangam?${params.toString()}`);
+  const res = await fetch(`${API_BASE_URL}/v1/panchangam?${params.toString()}`);
   if (!res.ok) {
     throw new Error(`Panchangam API error: ${res.status}`);
   }
@@ -39,7 +39,7 @@ export async function fetchPanchangamRange(
   endDate: string,
   city: City,
 ): Promise<PanchangamResponse[]> {
-  const res = await fetch(`${BASE_URL}/v1/panchangam/range`, {
+  const res = await fetch(`${API_BASE_URL}/v1/panchangam/range`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
