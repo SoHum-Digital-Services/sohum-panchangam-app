@@ -41,7 +41,7 @@ export function BirthDetailsFields({ details, onChange, title }: { details: Birt
         <TimeInput value={details.birth_time} onChange={(birth_time) => onChange({ ...details, birth_time })} />
       </View>
 
-      <View style={[styles.field, styles.placeField]}>
+      <View style={styles.field}>
         <Text style={styles.label}>Place of birth</Text>
         <PlaceInput
           initialLabel={details.place_label}
@@ -60,7 +60,6 @@ const styles = StyleSheet.create({
   wrap: { gap: 9 },
   title: { color: colors.ink, fontSize: 16, fontWeight: '800', marginBottom: 1 },
   field: { gap: 4 },
-  placeField: { zIndex: 20 },
   label: { color: colors.muted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.25 },
   input: { minHeight: 44, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.white, paddingHorizontal: 12, color: colors.ink, fontSize: 15 },
   hint: { color: colors.muted, fontSize: 11, marginTop: 1 },
