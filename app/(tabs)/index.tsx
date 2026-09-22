@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { CHERUVUGATTU, fetchPanchangam } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
@@ -43,6 +43,13 @@ export default function TodayScreen() {
     load(selectedDate, true);
   };
 
+  const openSettings = () => {
+    Alert.alert(
+      'SoHum Panchangam',
+      `Location: ${CHERUVUGATTU.name_en}\nCoordinates: ${CHERUVUGATTU.latitude}, ${CHERUVUGATTU.longitude}\n\nMore settings like language, location, and ayanamsha presets will be added here.`,
+    );
+  };
+
   if (error) {
     return (
       <View style={styles.center}>
@@ -77,15 +84,27 @@ export default function TodayScreen() {
               <Text style={styles.brand}>SoHum పంచాంగం</Text>
               <Text style={styles.location}>⌖ {CHERUVUGATTU.name_te}, {CHERUVUGATTU.name_en}</Text>
             </View>
-            <View style={styles.settingsDot}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Open settings"
+              hitSlop={10}
+              onPress={openSettings}
+              style={({ pressed }) => [styles.settingsDot, pressed && styles.pressedControl]}
+            >
               <Text style={styles.settingsDotText}>⚙</Text>
-            </View>
+            </Pressable>
           </View>
 
           <View style={styles.datePanel}>
-            <View style={styles.panelGlow} />
+            <View pointerEvents="none" style={styles.panelGlow} />
             <View style={styles.dayNav}>
-              <Pressable onPress={() => setSelectedDate(addDays(selectedDate, -1))} style={styles.arrowButton}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Previous day"
+                hitSlop={12}
+                onPress={() => setSelectedDate(addDays(selectedDate, -1))}
+                style={({ pressed }) => [styles.arrowButton, pressed && styles.pressedControl]}
+              >
                 <Text style={styles.arrowText}>‹</Text>
               </Pressable>
               <View style={styles.dayTitle}>
@@ -93,7 +112,13 @@ export default function TodayScreen() {
                 <Text style={styles.date}>{formatDateLong(data.date)}</Text>
                 <Text style={styles.monthLine}>{data.lunar_month.name_te} · {pakshaTe(data.tithi.paksha)} పక్షం</Text>
               </View>
-              <Pressable onPress={() => setSelectedDate(addDays(selectedDate, 1))} style={styles.arrowButton}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Next day"
+                hitSlop={12}
+                onPress={() => setSelectedDate(addDays(selectedDate, 1))}
+                style={({ pressed }) => [styles.arrowButton, pressed && styles.pressedControl]}
+              >
                 <Text style={styles.arrowText}>›</Text>
               </Pressable>
             </View>
@@ -103,7 +128,12 @@ export default function TodayScreen() {
                 const itemParts = formatDateParts(date);
                 const active = date === selectedDate;
                 return (
-                  <Pressable key={date} onPress={() => setSelectedDate(date)} style={[styles.datePill, active && styles.datePillActive]}>
+                  <Pressable
+                    key={date}
+                    hitSlop={6}
+                    onPress={() => setSelectedDate(date)}
+                    style={({ pressed }) => [styles.datePill, active && styles.datePillActive, pressed && styles.pressedControl]}
+                  >
                     <Text style={[styles.datePillWeekday, active && styles.datePillTextActive]}>{weekdayShort(date)}</Text>
                     <Text style={[styles.datePillDay, active && styles.datePillTextActive]}>{itemParts.day}</Text>
                   </Pressable>
@@ -228,6 +258,7 @@ const styles = StyleSheet.create({
   location: { color: colors.muted, marginTop: 3, fontWeight: '600', fontSize: 11 },
   settingsDot: { width: 34, height: 34, borderRadius: 12, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
   settingsDotText: { color: colors.maroon },
+  pressedControl: { opacity: 0.72 },
   datePanel: { marginTop: 14, borderRadius: 24, padding: 13, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 16, elevation: 3 },
   panelGlow: { position: 'absolute', width: 160, height: 160, borderRadius: 80, right: -54, top: -72, backgroundColor: '#ffffff12' },
   dayNav: { flexDirection: 'row', alignItems: 'center', gap: 10 },
