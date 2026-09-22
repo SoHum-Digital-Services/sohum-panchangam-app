@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { CHERUVUGATTU, fetchPanchangam } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
@@ -106,29 +106,29 @@ export default function TodayScreen() {
           <View style={styles.datePanel}>
             <View pointerEvents="none" style={styles.panelGlow} />
             <View style={styles.dayNav}>
-              <Pressable
+              <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityLabel="Previous day"
-                hitSlop={18}
-                onPressIn={goPreviousDay}
-                style={({ pressed }) => [styles.arrowButton, pressed && styles.pressedControl]}
+                activeOpacity={0.65}
+                onPress={goPreviousDay}
+                style={[styles.arrowButton, styles.leftArrowButton]}
               >
                 <Text style={styles.arrowText}>‹</Text>
-              </Pressable>
+              </TouchableOpacity>
               <View pointerEvents="none" style={styles.dayTitle}>
                 <Text style={styles.vara}>{data.vara.name_te}</Text>
                 <Text style={styles.date}>{formatDateLong(data.date)}</Text>
                 <Text style={styles.monthLine}>{data.lunar_month.name_te} · {pakshaTe(data.tithi.paksha)} పక్షం</Text>
               </View>
-              <Pressable
+              <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityLabel="Next day"
-                hitSlop={18}
-                onPressIn={goNextDay}
-                style={({ pressed }) => [styles.arrowButton, styles.nextArrowButton, pressed && styles.pressedControl]}
+                activeOpacity={0.65}
+                onPress={goNextDay}
+                style={[styles.arrowButton, styles.rightArrowButton]}
               >
                 <Text style={styles.arrowText}>›</Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.dateStrip}>
@@ -269,11 +269,12 @@ const styles = StyleSheet.create({
   pressedControl: { opacity: 0.72 },
   datePanel: { marginTop: 14, borderRadius: 24, padding: 13, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 16, elevation: 3 },
   panelGlow: { position: 'absolute', width: 160, height: 160, borderRadius: 80, right: -54, top: -72, backgroundColor: '#ffffff12' },
-  dayNav: { flexDirection: 'row', alignItems: 'center', gap: 8, zIndex: 2 },
-  arrowButton: { width: 46, height: 46, borderRadius: 16, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center', zIndex: 5, elevation: 5 },
-  nextArrowButton: { marginRight: -4 },
+  dayNav: { minHeight: 74, alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 2 },
+  arrowButton: { position: 'absolute', top: 13, width: 54, height: 48, borderRadius: 16, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center', zIndex: 10, elevation: 10 },
+  leftArrowButton: { left: 0 },
+  rightArrowButton: { right: 0 },
   arrowText: { color: colors.white, fontSize: 28, lineHeight: 30 },
-  dayTitle: { flex: 1, alignItems: 'center' },
+  dayTitle: { width: '100%', alignItems: 'center', paddingHorizontal: 62 },
   vara: { color: colors.gold, fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
   date: { color: colors.white, fontSize: 19, fontWeight: '800', marginTop: 2, textAlign: 'center', lineHeight: 24 },
   monthLine: { color: '#ffe7d8', marginTop: 4, fontWeight: '600', fontSize: 12, textAlign: 'center' },
