@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { CHERUVUGATTU, fetchPanchangamRange } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
@@ -28,11 +28,11 @@ export default function CalendarScreen() {
       const byDate: Record<string, PanchangamResponse> = {};
       for (const d of results) byDate[d.date] = d;
       setDays(byDate);
-      if (!byDate[selectedDate]) setSelectedDate(results.find((d) => d.date === TODAY)?.date ?? start);
+      setSelectedDate((current) => (byDate[current] ? current : results.find((d) => d.date === TODAY)?.date ?? start));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load calendar');
     }
-  }, [selectedDate]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -116,42 +116,55 @@ function SelectedDayDetails({ day }: { day: PanchangamResponse }) {
   const parts = formatDateParts(day.date);
   return (
     <View style={styles.details}>
-      <View style={styles.summaryRow}>
-        <View style={styles.moonBadge}>
-          <Text style={styles.moonIcon}>◐</Text>
-        </View>
-        <View style={styles.dateBlock}>
-          <Text style={styles.dateBlockDay}>{parts.day}<Text style={styles.dateBlockMonth}> {parts.month}</Text></Text>
-          <Text style={styles.dateBlockWeek}>{parts.weekday.toUpperCase()}</Text>
-          <View style={styles.dateBlockDivider} />
-          <Text style={styles.dateBlockTithi}>{day.tithi.index} {pakshaTe(day.tithi.paksha)}</Text>
-          <Text style={styles.dateBlockMonthLine}>{day.lunar_month.name_te}</Text>
-        </View>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{parts.day} {parts.month}</Text>
+        <Text style={styles.swipeHint}>Swipe details →</Text>
       </View>
 
-      <DetailCard title="పంచాంగం" lines={primaryDayLines(day)} />
-      <DetailCard title="Auspicious/Inauspicious" lines={muhurtaLines(day)} />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        decelerationRate="fast"
+        snapToInterval={344}
+        contentContainerStyle={styles.cardRail}
+      >
+        <View style={[styles.summaryRow, styles.railCard]}>
+          <View style={styles.moonBadge}>
+            <Text style={styles.moonIcon}>◐</Text>
+          </View>
+          <View style={styles.dateBlock}>
+            <Text style={styles.dateBlockDay}>{parts.day}<Text style={styles.dateBlockMonth}> {parts.month}</Text></Text>
+            <Text style={styles.dateBlockWeek}>{parts.weekday.toUpperCase()}</Text>
+            <View style={styles.dateBlockDivider} />
+            <Text style={styles.dateBlockTithi}>{day.tithi.index} {pakshaTe(day.tithi.paksha)}</Text>
+            <Text style={styles.dateBlockMonthLine}>{day.lunar_month.name_te}</Text>
+          </View>
+        </View>
 
-      {day.festivals.length > 0 && (
-        <Card style={styles.festivalCard}>
-          <Text style={styles.panelTitle}>పండుగలు</Text>
-          {day.festivals.map((festival) => (
-            <Text key={festival} style={styles.festivalText}>✦ {festival}</Text>
-          ))}
+        <DetailCard title="పంచాంగం" lines={primaryDayLines(day)} style={styles.railCard} />
+        <DetailCard title="Auspicious/Inauspicious" lines={muhurtaLines(day)} style={styles.railCard} />
+
+        {day.festivals.length > 0 && (
+          <Card style={[styles.festivalCard, styles.railCard]}>
+            <Text style={styles.panelTitle}>పండుగలు</Text>
+            {day.festivals.map((festival) => (
+              <Text key={festival} style={styles.festivalText}>✦ {festival}</Text>
+            ))}
+          </Card>
+        )}
+
+        <Card style={[styles.sankalpamCard, styles.railCard]}>
+          <Text style={styles.panelTitle}>Sankalpam</Text>
+          <Text style={styles.sankalpamText}>{day.sankalpam}</Text>
         </Card>
-      )}
-
-      <Card style={styles.sankalpamCard}>
-        <Text style={styles.panelTitle}>Sankalpam</Text>
-        <Text style={styles.sankalpamText}>{day.sankalpam}</Text>
-      </Card>
+      </ScrollView>
     </View>
   );
 }
 
-function DetailCard({ title, lines }: { title: string; lines: Array<{ label: string; value: string }> }) {
+function DetailCard({ title, lines, style }: { title: string; lines: Array<{ label: string; value: string }>; style?: ViewStyle }) {
   return (
-    <Card style={styles.detailCard}>
+    <Card style={[styles.detailCard, style]}>
       <View style={styles.detailHeader}>
         <Text style={styles.panelTitle}>{title}</Text>
         <Text style={styles.infoDot}>ⓘ</Text>
@@ -189,8 +202,13 @@ const styles = StyleSheet.create({
   marker: { color: colors.orange, fontSize: 12 },
   markerSelected: { color: colors.gold },
   errorText: { color: colors.maroon, textAlign: 'center', padding: 16 },
-  details: { padding: 16, gap: 14, paddingBottom: 32 },
-  summaryRow: { flexDirection: 'row', gap: 14, alignItems: 'center', marginVertical: 2, backgroundColor: colors.card, borderRadius: 24, borderWidth: 1, borderColor: colors.line, padding: 14 },
+  details: { paddingVertical: 14, gap: 8, paddingBottom: 26 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 18 },
+  sectionTitle: { color: colors.ink, fontSize: 18, fontWeight: '900' },
+  swipeHint: { color: colors.muted, fontSize: 12, fontWeight: '800' },
+  cardRail: { paddingHorizontal: 16, gap: 12, paddingVertical: 8 },
+  railCard: { width: 332, minHeight: 218 },
+  summaryRow: { flexDirection: 'row', gap: 14, alignItems: 'center', marginVertical: 2, backgroundColor: colors.card, borderRadius: 24, borderWidth: 1, borderColor: colors.line, padding: 16, shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 18, elevation: 2 },
   moonBadge: { width: 82, height: 82, borderRadius: 22, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
   moonIcon: { color: '#dfe3ea', fontSize: 52 },
   dateBlock: { flex: 1 },
