@@ -4,6 +4,7 @@ import { Card } from '../../src/components/Card';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { colors } from '../../src/theme';
 import { usePanchangamSettings } from '../../src/settings';
+import { useAuth } from '../../src/auth';
 
 export default function MoreScreen() {
   const { language } = usePanchangamSettings();
@@ -18,6 +19,7 @@ export default function MoreScreen() {
         />
 
         <View style={styles.content}>
+          <AccountCard telugu={telugu} />
           <FeatureCard
             icon="☌"
             title={telugu ? 'జాతకం' : 'Horoscope'}
@@ -49,6 +51,43 @@ export default function MoreScreen() {
   );
 }
 
+function AccountCard({ telugu }: { telugu: boolean }) {
+  const { user, loading, signInWithGoogle, signOut } = useAuth();
+
+  if (loading) return null;
+
+  return (
+    <Card style={styles.accountCard}>
+      {user ? (
+        <View style={styles.accountRow}>
+          <Text style={styles.accountText} numberOfLines={1}>
+            {telugu ? 'సైన్ ఇన్ అయ్యారు: ' : 'Signed in as '}
+            {user.email ?? user.user_metadata?.full_name ?? (telugu ? 'మీరు' : 'you')}
+          </Text>
+          <Pressable accessibilityRole="button" onPress={signOut}>
+            <Text style={styles.accountLink}>{telugu ? 'సైన్ అవుట్' : 'Sign out'}</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <>
+          <Text style={styles.accountText}>
+            {telugu
+              ? 'ChantTracker, GatiVani వంటి SoHum యాప్‌లలో ఉపయోగించే అదే ఖాతాతో సైన్ ఇన్ చేయండి (ఐచ్ఛికం).'
+              : 'Sign in with the same account you use across SoHum apps like ChantTracker and GatiVani (optional).'}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.accountAction, pressed && styles.actionPressed]}
+            onPress={signInWithGoogle}
+          >
+            <Text style={styles.actionText}>{telugu ? 'Google తో కొనసాగండి' : 'Continue with Google'}</Text>
+          </Pressable>
+        </>
+      )}
+    </Card>
+  );
+}
+
 function FeatureCard({ icon, title, description, action, onPress }: { icon: string; title: string; description: string; action: string; onPress: () => void }) {
   return (
     <Card style={styles.featureCard}>
@@ -68,6 +107,11 @@ const styles = StyleSheet.create({
   screen: { flex: 1, alignItems: 'center', backgroundColor: colors.creamDeep },
   appFrame: { width: '100%', maxWidth: 430, flex: 1, backgroundColor: colors.cream },
   content: { paddingHorizontal: 16, gap: 10 },
+  accountCard: { padding: 14 },
+  accountRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  accountText: { flex: 1, color: colors.ink, fontSize: 13, lineHeight: 18 },
+  accountLink: { color: colors.maroon, fontSize: 13, fontWeight: '800' },
+  accountAction: { alignItems: 'center', backgroundColor: colors.maroon, borderRadius: 12, minHeight: 44, justifyContent: 'center', marginTop: 10 },
   featureCard: { padding: 14 },
   featureTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   iconBadge: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.maroonSoft },
