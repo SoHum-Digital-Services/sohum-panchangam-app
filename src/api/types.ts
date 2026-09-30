@@ -26,11 +26,13 @@ export interface Nakshatra extends NamedPeriod {
 export interface Yoga extends NamedPeriod {
   index: number;
   name_en: string;
+  name_te: string;
 }
 
 export interface Karana extends NamedPeriod {
   index: number;
   name_en: string;
+  name_te: string;
 }
 
 export interface LunarMonth {
@@ -62,6 +64,7 @@ export interface Muhurta {
   madhyahna_sandhya: NamedPeriod;
   sayam_sandhya: NamedPeriod;
   pradosha_kalam: NamedPeriod;
+  durmuhurtham: NamedPeriod[];
 }
 
 export interface NamedCycle {
@@ -76,7 +79,33 @@ export interface Varjyam extends NamedPeriod {
   source_text?: string;
 }
 
+// A festival or observance of the day. `recurring` marks the regular days (Ekadashi, Pournami, Amavasya, ...).
+export interface Observance {
+  key: string;
+  name_en: string;
+  name_te: string;
+  kind: 'festival' | 'solar' | 'planetary' | 'weekday' | 'recurring';
+  recurring: boolean;
+}
+
+export interface DayDisplay {
+  tithi: string;
+  nakshatra: string;
+  yoga: string;
+  karana: string;
+  rahu_kalam: string;
+  yamagandam: string;
+  gulika_kalam: string;
+  abhijit: string;
+  durmuhurtham: string;
+  varjyam: string;
+  sunrise: string;
+  sunset: string;
+  festivals: string[];
+}
+
 export interface PanchangamResponse {
+  schema: string;
   date: string;
   location: { latitude: number; longitude: number; altitude_m: number; timezone: string };
   sunrise: string;
@@ -95,6 +124,9 @@ export interface PanchangamResponse {
   varjyam: Varjyam[];
   source: { profile: string; calculation?: string; note?: string; month_system: string };
   festivals: string[];
+  observances: Observance[];
+  // Ready-to-show text for the timings, in both languages (see sohum-contracts PANCHANGAM_DAY_SHAPE.md section 4).
+  display: Record<'te' | 'en', DayDisplay>;
   samvatsara: NamedCycle;
   ritu: NamedCycle;
   ayana: NamedCycle;

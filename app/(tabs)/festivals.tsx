@@ -30,15 +30,15 @@ export default function FestivalsScreen() {
       const days: PanchangamResponse[] = await fetchPanchangamRange(start, end, city);
       const festivalDays: FestivalDay[] = [];
       for (const day of days) {
-        for (const name of day.festivals) {
-          festivalDays.push({ date: day.date, name, tithi_en: day.tithi.name_en, tithi_te: day.tithi.name_te });
+        for (const o of day.observances) {
+          festivalDays.push({ date: day.date, name: telugu ? o.name_te : o.name_en, tithi_en: day.tithi.name_en, tithi_te: day.tithi.name_te });
         }
       }
       setItems(festivalDays);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load festivals');
     }
-  }, [city]);
+  }, [city, telugu]);
 
   useFocusEffect(
     useCallback(() => {
