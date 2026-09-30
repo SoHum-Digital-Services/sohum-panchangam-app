@@ -13,7 +13,7 @@ export interface Tithi extends NamedPeriod {
   index: number;
   name_en: string;
   name_te: string;
-  paksha: 'Shukla' | 'Krishna';
+  paksha: 'Shukla' | 'Bahula' | 'Krishna';
 }
 
 export interface Nakshatra extends NamedPeriod {
@@ -71,9 +71,7 @@ export interface NamedCycle {
 }
 
 export interface Varjyam extends NamedPeriod {
-  // When Swiss-Lahiri computed, this is the nakshatra name. When sourced
-  // from the Mukteshwara reference workbook it's absent (that workbook
-  // doesn't record which nakshatra); source_text has the raw published row.
+  // The nakshatra name, when the engine gives one for this period.
   nakshatra?: string;
   source_text?: string;
 }
@@ -95,7 +93,7 @@ export interface PanchangamResponse {
   sun_rashi: Rashi;
   muhurta: Muhurta;
   varjyam: Varjyam[];
-  source: { profile: string; note: string; month_system: string };
+  source: { profile: string; calculation?: string; note?: string; month_system: string };
   festivals: string[];
   samvatsara: NamedCycle;
   ritu: NamedCycle;
