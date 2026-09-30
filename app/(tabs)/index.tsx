@@ -7,7 +7,7 @@ import { Card } from '../../src/components/Card';
 import { DetailCard } from '../../src/components/DetailCard';
 import { colors } from '../../src/theme';
 import { addDays, formatDateLong, formatDateParts, formatTime, isoDate } from '../../src/format';
-import { muhurtaCardTitle, muhurtaLines, pakshaTe, panchangamCardTitle, primaryDayLines, sankalpamCardTitle, weekdayShort } from '../../src/panchangamUi';
+import { muhurtaCardTitle, observanceNames, muhurtaLines, pakshaTe, panchangamCardTitle, primaryDayLines, sankalpamCardTitle, weekdayShort } from '../../src/panchangamUi';
 import { PANCHANGAM_CITIES, usePanchangamSettings } from '../../src/settings';
 import { railStyles, useRailMetrics } from '../../src/rail';
 
@@ -208,10 +208,10 @@ export default function TodayScreen() {
               </View>
             </Card>
 
-            {data.festivals.length > 0 && (
+            {data.observances.length > 0 && (
               <Card style={[railStyles.festivalCard, railCard]}>
                 <Text style={railStyles.panelTitle}>{telugu ? 'ఈరోజు విశేషం' : 'Today’s observance'}</Text>
-                {data.festivals.map((festival) => (
+                {observanceNames(data, language).map((festival) => (
                   <Text key={festival} style={railStyles.festivalText}>✦ {festival}</Text>
                 ))}
               </Card>

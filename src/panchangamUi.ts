@@ -44,6 +44,11 @@ export function calendarMarkers(day?: PanchangamResponse): string[] {
   return markers.slice(0, 3);
 }
 
+// The day's festivals and observances in the chosen language.
+export function observanceNames(day: PanchangamResponse, language: AppLanguage = 'te'): string[] {
+  return day.observances.map((o) => (language === 'te' ? o.name_te : o.name_en));
+}
+
 export function primaryDayLines(day: PanchangamResponse, language: AppLanguage = 'te'): Array<{ label: string; value: string }> {
   const te = language === 'te';
   return [
@@ -52,6 +57,8 @@ export function primaryDayLines(day: PanchangamResponse, language: AppLanguage =
     { label: te ? 'తిథి' : 'Tithi', value: `${te ? day.tithi.name_te : day.tithi.name_en} · ${formatTime(day.tithi.ends_at)}` },
     { label: te ? 'వాసరః' : 'Weekday', value: te ? day.vara.name_te : day.vara.name_en },
     { label: te ? 'నక్షత్రం' : 'Nakshatra', value: `${te ? day.nakshatra.name_te : day.nakshatra.name_en} · ${formatTime(day.nakshatra.ends_at)}` },
+    { label: te ? 'యోగం' : 'Yoga', value: `${te ? day.yoga.name_te : day.yoga.name_en} · ${formatTime(day.yoga.ends_at)}` },
+    { label: te ? 'కరణం' : 'Karana', value: `${te ? day.karana.name_te : day.karana.name_en} · ${formatTime(day.karana.ends_at)}` },
     { label: te ? 'దివసం' : 'Daylight', value: `${formatTime(day.sunrise)} - ${formatTime(day.sunset)}` },
   ];
 }
@@ -68,5 +75,7 @@ export function muhurtaLines(day: PanchangamResponse, language: AppLanguage = 't
     { label: te ? 'అభిజిత్' : 'Abhijit', value: span(m.abhijit) },
     { label: te ? 'బ్రహ్మ ముహూర్తం' : 'Brahma Muhurta', value: span(m.brahma_muhurtam) },
     { label: te ? 'ప్రదోష కాలం' : 'Pradosham', value: span(m.pradosha_kalam) },
+    { label: te ? 'దుర్ముహూర్తం' : 'Durmuhurtham', value: day.display[language].durmuhurtham || '—' },
+    { label: te ? 'వర్జ్యం' : 'Varjyam', value: day.display[language].varjyam || '—' }, // the windows that begin today; `day.varjyam` also holds one that starts tomorrow morning
   ];
 }

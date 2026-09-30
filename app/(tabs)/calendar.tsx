@@ -9,7 +9,7 @@ import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { colors } from '../../src/theme';
 import { formatDateParts, isoDate } from '../../src/format';
 import { buildMonthGrid, monthBounds, MONTH_NAMES, WEEKDAY_LABELS } from '../../src/monthGrid';
-import { calendarMarkers, muhurtaCardTitle, muhurtaLines, panchangamCardTitle, primaryDayLines, sankalpamCardTitle } from '../../src/panchangamUi';
+import { calendarMarkers, muhurtaCardTitle, observanceNames, muhurtaLines, panchangamCardTitle, primaryDayLines, sankalpamCardTitle } from '../../src/panchangamUi';
 import { usePanchangamSettings, type AppLanguage } from '../../src/settings';
 import { railStyles, useRailMetrics } from '../../src/rail';
 
@@ -151,10 +151,10 @@ function SelectedDayDetails({ day, language, cardWidth, snapInterval }: { day: P
         <DetailCard title={panchangamCardTitle(telugu)} lines={primaryDayLines(day, language)} style={railCard} />
         <DetailCard title={muhurtaCardTitle(telugu)} lines={muhurtaLines(day, language)} style={railCard} />
 
-        {day.festivals.length > 0 && (
+        {day.observances.length > 0 && (
           <Card style={[railStyles.festivalCard, railCard]}>
             <Text style={railStyles.panelTitle}>{telugu ? 'పండుగలు' : 'Festivals'}</Text>
-            {day.festivals.map((festival) => (
+            {observanceNames(day, language).map((festival) => (
               <Text key={festival} style={railStyles.festivalText}>✦ {festival}</Text>
             ))}
           </Card>
