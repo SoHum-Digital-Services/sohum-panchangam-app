@@ -6,6 +6,7 @@ import type { FestivalItem } from '../api/types';
 import { formatDateLong, formatDateParts } from '../format';
 import type { AppLanguage } from '../settings';
 import { HomeFeatured } from './HomeFeatured';
+import { newsArtwork, stotramArtwork } from '../homeArtwork';
 
 export function HomeTempleContent({ language, festivals, festivalError, onSelectFestival, onViewFestivals }: {
   language: AppLanguage;
@@ -33,12 +34,12 @@ export function HomeTempleContent({ language, festivals, festivalError, onSelect
     fetchTemplePhotos().then((items) => { if (active) setPhotos(items.filter((item) => item.media_type === 'PHOTO')); }).catch(() => {});
     return () => { active = false; };
   }, []);
-  // One temple establishing photo decorates the rails; it is not an event or deity attribution.
+  // A temple establishing photo decorates festival cards; it is not an event attribution.
   const photo = photos.find((item) => item.category === 'Temple' && /temple/i.test(item.title)) ?? photos[0];
   const title = (item: Stotram | TempleNews) => te ? item.title_telugu || item.title : item.title;
   const body = reading ? 'text_telugu' in reading ? reading.text_telugu : te ? reading.content_telugu || reading.content : reading.content : '';
   const status = (items: unknown[] | null, failed: boolean) => !items ? <ActivityIndicator color="#f15a06" style={styles.status} /> : items.length === 0 ? <Text style={styles.status}>{failed ? (te ? 'విషయాలను లోడ్ చేయలేకపోయాము' : 'Unable to load content') : (te ? 'ప్రస్తుతం విషయాలు లేవు' : 'No content available')}</Text> : null;
-  const image = <View style={styles.image}>{photo && <Image source={{ uri: templeImageUrl(photo.image_url) }} style={styles.image} accessibilityLabel={photo.title} />}</View>;
+  const festivalImage = <View style={styles.image}>{photo && <Image source={{ uri: templeImageUrl(photo.image_url) }} style={styles.image} accessibilityLabel={photo.title} />}</View>;
   const section = (label: string, onPress: () => void) => <View style={styles.heading}><Text style={styles.headingText}>{label}</Text><Pressable accessibilityRole="button" accessibilityLabel={`${te ? 'అన్నీ చూడండి' : 'View All'}: ${label}`} onPress={onPress} style={styles.viewAllButton}><Text style={styles.viewAll}>{te ? 'అన్నీ చూడండి' : 'View All'}</Text></Pressable></View>;
 
   return <>
@@ -49,7 +50,7 @@ export function HomeTempleContent({ language, festivals, festivalError, onSelect
       {festivals?.slice(0, 8).map((item) => {
         const date = formatDateParts(item.date);
         return <Pressable key={`${item.key}-${item.date}`} accessibilityRole="button" onPress={() => onSelectFestival(item.date)} style={styles.card}>
-          {image}
+          {festivalImage}
           <View style={styles.badge}><Text style={styles.badgeDay}>{date.day}</Text><Text style={styles.badgeMonth}>{date.month}</Text></View>
           <View style={styles.caption}><Text style={styles.cardTitle}>{te ? item.name_te || item.name : item.name}</Text></View>
         </Pressable>;
@@ -58,13 +59,13 @@ export function HomeTempleContent({ language, festivals, festivalError, onSelect
     {section(te ? 'స్తోత్రాలు' : 'Stotrams', () => setList('stotrams'))}
     {status(stotrams, errors.stotrams)}
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
-      {stotrams?.slice(0, 8).map((item) => <Pressable key={item.id} accessibilityRole="button" onPress={() => setReading(item)} style={styles.card}>{image}<View style={styles.caption}><Text style={styles.cardTitle}>{title(item)}</Text></View></Pressable>)}
+      {stotrams?.slice(0, 8).map((item) => <Pressable key={item.id} accessibilityRole="button" onPress={() => setReading(item)} style={styles.card}><Image source={stotramArtwork(item)} style={styles.image} accessible={false} /><View style={styles.caption}><Text style={styles.cardTitle}>{title(item)}</Text></View></Pressable>)}
     </ScrollView>
     {section(te ? 'దేవాలయ వార్తలు' : 'Temple news', () => setList('news'))}
     {status(news, errors.news)}
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
       {news?.slice(0, 8).map((item) => <Pressable key={item.id} accessibilityRole="button" onPress={() => setReading(item)} style={styles.card}>
-        {image}
+        <Image source={newsArtwork(item)} style={styles.image} accessible={false} />
         {item.event_date && <View style={styles.badge}><Text style={styles.badgeDay}>{formatDateParts(item.event_date).day}</Text><Text style={styles.badgeMonth}>{formatDateParts(item.event_date).month}</Text></View>}
         <View style={styles.caption}><Text style={styles.cardTitle}>{title(item)}</Text></View>
       </Pressable>)}
@@ -92,14 +93,14 @@ const styles = StyleSheet.create({
   headingText: { flex: 1, color: '#141c26', fontSize: 20, lineHeight: 32, fontWeight: '600' },
   viewAllButton: { minHeight: 44, justifyContent: 'center' },
   viewAll: { color: '#8b8b8b', fontSize: 13, lineHeight: 22 },
-  rail: { paddingHorizontal: 16, gap: 10, paddingTop: 8, paddingBottom: 14 },
-  card: { width: 154, borderRadius: 5, backgroundColor: '#fbf5e9', shadowColor: '#18202a', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 },
-  image: { width: 154, height: 154, backgroundColor: '#eee', borderTopLeftRadius: 5, borderTopRightRadius: 5, overflow: 'hidden' },
-  caption: { paddingHorizontal: 12, paddingVertical: 14, minHeight: 76 },
-  cardTitle: { color: '#141c26', fontSize: 16, lineHeight: 25, textAlign: 'center' },
-  badge: { position: 'absolute', top: 8, right: 8, backgroundColor: '#fff', borderRadius: 3, borderWidth: 1, borderColor: '#f15a06', minWidth: 36, paddingHorizontal: 5, paddingVertical: 4, alignItems: 'center' },
-  badgeDay: { color: '#141c26', fontSize: 17, fontWeight: '700', lineHeight: 21 },
-  badgeMonth: { color: '#141c26', fontSize: 12, fontWeight: '600', lineHeight: 17 },
+  rail: { paddingHorizontal: 16, gap: 8, paddingTop: 6, paddingBottom: 10 },
+  card: { width: 116, borderRadius: 5, backgroundColor: '#fbf5e9', shadowColor: '#18202a', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 },
+  image: { width: 116, height: 100, backgroundColor: '#eee', borderTopLeftRadius: 5, borderTopRightRadius: 5, overflow: 'hidden' },
+  caption: { paddingHorizontal: 8, paddingVertical: 8, minHeight: 54 },
+  cardTitle: { color: '#141c26', fontSize: 13, lineHeight: 20, textAlign: 'center' },
+  badge: { position: 'absolute', top: 6, right: 6, backgroundColor: '#fff', borderRadius: 3, borderWidth: 1, borderColor: '#f15a06', minWidth: 30, paddingHorizontal: 4, paddingVertical: 2, alignItems: 'center' },
+  badgeDay: { color: '#141c26', fontSize: 14, fontWeight: '700', lineHeight: 18 },
+  badgeMonth: { color: '#141c26', fontSize: 10, fontWeight: '600', lineHeight: 14 },
   status: { marginHorizontal: 16, marginVertical: 16, color: '#747474', fontSize: 14, lineHeight: 24 },
   reader: { flex: 1, backgroundColor: '#fff' },
   readerHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
