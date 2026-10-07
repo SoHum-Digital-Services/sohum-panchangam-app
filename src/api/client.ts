@@ -1,6 +1,7 @@
 import type { FestivalItem, PanchangamResponse } from './types';
 
-export const API_BASE_URL = 'https://panchangam-eight.vercel.app';
+// sohum.cc proxies /v1/* to the panchangam API (rewrites in the SoHum-Digital-Services/website repo).
+export const API_BASE_URL = 'https://sohum.cc';
 
 export interface City {
   slug: string;

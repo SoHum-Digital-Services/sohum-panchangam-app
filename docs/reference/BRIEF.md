@@ -42,7 +42,7 @@ Screenshots of the Vaidika Vignanam app are in this folder (`docs/reference/`). 
   - API: `src/api/client.ts`, with types in `src/api/types.ts`
 
 ## Data rules (important)
-- The API is `https://panchangam-eight.vercel.app`. Use `GET /v1/panchangam`, `POST /v1/panchangam/range` and `GET /v1/festivals`.
+- The API is `https://sohum.cc` (which proxies `/v1/*` to the panchangam backend). Use `GET /v1/panchangam`, `POST /v1/panchangam/range` and `GET /v1/festivals`.
 - **Never invent values.** The API does **not** provide Amrita Kalam or the rashi end time, so leave them out.
 - `muhurta.durmuhurtham` and `yoga.name_te` / `karana.name_te` are optional. Show them only when present.
 - Reuse the existing helpers. Don't hardcode panchang values in UI code.
