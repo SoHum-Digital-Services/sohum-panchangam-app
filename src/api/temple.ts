@@ -50,15 +50,6 @@ export interface TempleNews {
   created_at: string;
 }
 
-export interface TemplePhoto {
-  id: string;
-  title: string;
-  image_url: string;
-  category: string;
-  media_type: string;
-  created_at: string;
-}
-
 export async function fetchStotrams(): Promise<Stotram[]> {
   const res = await fetch(`${TEMPLE_API_BASE}/stotrams`);
   if (!res.ok) throw new Error(`Temple stotrams API error: ${res.status}`);
@@ -69,14 +60,4 @@ export async function fetchTempleNews(): Promise<TempleNews[]> {
   const res = await fetch(`${TEMPLE_API_BASE}/news`);
   if (!res.ok) throw new Error(`Temple news API error: ${res.status}`);
   return res.json();
-}
-
-export async function fetchTemplePhotos(): Promise<TemplePhoto[]> {
-  const res = await fetch(`${TEMPLE_API_BASE}/gallery?media_type=PHOTO`);
-  if (!res.ok) throw new Error(`Temple gallery API error: ${res.status}`);
-  return res.json();
-}
-
-export function templeImageUrl(path: string): string {
-  return /^https?:\/\//i.test(path) ? path : `${TEMPLE_BOOKING_URL}/${path.replace(/^\//, '')}`;
 }
