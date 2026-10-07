@@ -64,7 +64,7 @@ export function PlaceInput({ initialLabel, onSelect, onDropdownVisibleChange }: 
         }}
         onFocus={() => setOpen(true)}
         placeholder={telugu ? 'ఒక నగరం లేదా పట్టణం పేరు టైప్ చేయండి' : 'Start typing a city or town'}
-        placeholderTextColor="#ab9989"
+        placeholderTextColor={colors.muted}
         style={styles.input}
       />
       {loading && <ActivityIndicator size="small" color={colors.maroon} style={styles.spinner} />}
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   wrap: { position: 'relative' },
   input: { minHeight: 44, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.white, paddingHorizontal: 12, color: colors.ink, fontSize: 15 },
   spinner: { position: 'absolute', right: 12, top: 12 },
-  dropdown: { position: 'absolute', top: 48, left: 0, right: 0, backgroundColor: colors.white, borderRadius: 12, borderWidth: 1, borderColor: colors.line, maxHeight: 220, overflow: 'hidden', shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.12, shadowRadius: 14, elevation: 6 },
+  dropdown: { position: 'absolute', top: 48, left: 0, right: 0, backgroundColor: colors.white, borderRadius: 12, borderWidth: 1, borderColor: colors.line, maxHeight: 220, overflow: 'hidden', shadowColor: colors.shadow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.12, shadowRadius: 14, elevation: 6 },
   option: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.line },
   optionPressed: { backgroundColor: colors.peach },
   optionText: { color: colors.ink, fontSize: 13 },

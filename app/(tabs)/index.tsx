@@ -91,7 +91,7 @@ export default function TodayScreen() {
       ref={scroll}
       style={styles.screen}
       contentContainerStyle={styles.shell}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#f15a06" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.maroon} />}
     >
       {focused && <StatusBar style="light" />}
       <View style={styles.appFrame}>
@@ -99,8 +99,8 @@ export default function TodayScreen() {
           <View style={styles.brandRow}>
             <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'సెట్టింగులు తెరవండి' : 'Open settings'} onPress={() => setSettingsOpen(true)} style={({ pressed }) => [styles.settingsDot, pressed && styles.pressedControl]}>
               <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                <Circle cx={12} cy={8} r={3.5} stroke="#fff" strokeWidth={1.8} />
-                <Path d="M5 21v-3a7 7 0 0 1 14 0v3" stroke="#fff" strokeWidth={1.8} strokeLinecap="round" />
+                <Circle cx={12} cy={8} r={3.5} stroke={colors.white} strokeWidth={1.8} />
+                <Path d="M5 21v-3a7 7 0 0 1 14 0v3" stroke={colors.white} strokeWidth={1.8} strokeLinecap="round" />
               </Svg>
             </Pressable>
             <View style={styles.brandCopy}>
@@ -115,7 +115,7 @@ export default function TodayScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{telugu ? 'రోజు వివరాలు' : 'Day details'}</Text>
         </View>
-        {error ? <Text style={styles.festivalStatus}>{error}</Text> : !data ? <ActivityIndicator color="#f15a06" style={styles.festivalStatus} /> : <>
+        {error ? <Text style={styles.festivalStatus}>{error}</Text> : !data ? <ActivityIndicator color={colors.maroon} style={styles.festivalStatus} /> : <>
         <View style={styles.dayNav}>
           <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'మునుపటి రోజు' : 'Previous day'} onPress={() => setSelectedDate(addDays(data.date, -1))} style={styles.arrowButton}>
             <Text style={styles.arrowText}>‹</Text>
@@ -147,7 +147,7 @@ export default function TodayScreen() {
               <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'మూసివేయండి' : 'Close festivals'} onPress={() => setFestivalsOpen(false)} style={styles.closeButton}><Text style={styles.closeButtonText}>×</Text></Pressable>
             </View>
             <ScrollView style={styles.festivalList}>
-              {!festivalItems && <ActivityIndicator color="#f15a06" style={styles.festivalStatus} />}
+              {!festivalItems && <ActivityIndicator color={colors.maroon} style={styles.festivalStatus} />}
               {(festivalItems ?? []).map((festival) => (
                 <Pressable accessibilityRole="button" key={`${festival.key}-${festival.date}`} onPress={() => selectFestival(festival.date)} style={styles.festivalListRow}>
                   <Text style={styles.festivalListName}>{telugu ? festival.name_te || festival.name : festival.name}</Text>
@@ -219,28 +219,28 @@ function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLang
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#fff' },
+  screen: { flex: 1, backgroundColor: colors.white },
   shell: { alignItems: 'center', minHeight: '100%' },
-  appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: '#fff', paddingBottom: 24 },
-  header: { backgroundColor: '#f15a06', paddingBottom: 20, paddingHorizontal: 20 },
+  appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: colors.white, paddingBottom: 24 },
+  header: { backgroundColor: colors.maroon, paddingBottom: 20, paddingHorizontal: 20 },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   brandCopy: { flex: 1 },
-  brand: { color: '#fff', fontWeight: '700', fontSize: 24, lineHeight: 36 },
-  location: { color: '#fff', marginTop: 2, fontSize: 12, lineHeight: 20 },
-  settingsDot: { width: 44, height: 44, borderRadius: 22, borderWidth: 1.5, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  brand: { color: colors.white, fontWeight: '700', fontSize: 24, lineHeight: 36 },
+  location: { color: colors.white, marginTop: 2, fontSize: 12, lineHeight: 20 },
+  settingsDot: { width: 44, height: 44, borderRadius: 22, borderWidth: 1.5, borderColor: colors.white, alignItems: 'center', justifyContent: 'center' },
   pressedControl: { opacity: 0.72 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, justifyContent: 'space-between', paddingHorizontal: 16, marginTop: 16, marginBottom: 6 },
-  sectionTitle: { flex: 1, color: '#141c26', fontSize: 20, lineHeight: 32, fontWeight: '600' },
-  festivalStatus: { marginHorizontal: 16, marginVertical: 16, color: '#747474', fontSize: 14, lineHeight: 24 },
+  sectionTitle: { flex: 1, color: colors.ink, fontSize: 20, lineHeight: 32, fontWeight: '600' },
+  festivalStatus: { marginHorizontal: 16, marginVertical: 16, color: colors.muted, fontSize: 14, lineHeight: 24 },
   dayNav: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 16, marginBottom: 8 },
-  arrowButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#f15a06', alignItems: 'center', justifyContent: 'center' },
-  arrowText: { color: '#fff', fontSize: 27, lineHeight: 30 },
-  date: { flex: 1, color: '#141c26', fontSize: 14, fontWeight: '500', textAlign: 'center', lineHeight: 24 },
-  detailCard: { backgroundColor: '#fbf5e9', borderColor: '#f1ece4', borderRadius: 8 },
+  arrowButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.maroon, alignItems: 'center', justifyContent: 'center' },
+  arrowText: { color: colors.white, fontSize: 27, lineHeight: 30 },
+  date: { flex: 1, color: colors.ink, fontSize: 14, fontWeight: '500', textAlign: 'center', lineHeight: 24 },
+  detailCard: { backgroundColor: colors.peach, borderColor: colors.line, borderRadius: 8 },
   festivalList: { maxHeight: 420 },
-  festivalListRow: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  festivalListName: { color: '#141c26', fontSize: 16, lineHeight: 26 },
-  festivalListDate: { color: '#f15a06', fontSize: 12, lineHeight: 20, marginTop: 4 },
+  festivalListRow: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line },
+  festivalListName: { color: colors.ink, fontSize: 16, lineHeight: 26 },
+  festivalListDate: { color: colors.maroon, fontSize: 12, lineHeight: 20, marginTop: 4 },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#291a1370' },
   settingsSheet: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28 },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   cityName: { color: colors.ink, fontSize: 14, fontWeight: '800' },
   cityNameSelected: { color: colors.white },
   cityMeta: { color: colors.muted, fontSize: 11, fontWeight: '600', marginTop: 1 },
-  cityMetaSelected: { color: '#ffe7d8' },
+  cityMetaSelected: { color: colors.onAccentMuted },
   cityCheck: { color: colors.gold, fontSize: 18, fontWeight: '800' },
   languageRow: { flexDirection: 'row', gap: 8, marginBottom: 7 },
   languageOption: { flex: 1, minHeight: 44, borderRadius: 12, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
