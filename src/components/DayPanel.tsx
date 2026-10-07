@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Alert, LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import type { FestivalItem, PanchangamResponse } from '../api/types';
 import { formatDateParts } from '../format';
-import { dayPages, masaShort, moonPhase } from '../panchangamUi';
+import { dayPages, masaShort, moonPhase, shareText } from '../panchangamUi';
 import type { AppLanguage } from '../settings';
 import { colors } from '../theme';
 import { MoonPhase } from './MoonPhase';
@@ -26,6 +27,10 @@ export function DayPanel({ data, language, cityLabel, upcoming, upcomingLoading 
   const onLayout = (event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width);
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (width > 0) setPage(Math.round(event.nativeEvent.contentOffset.x / width));
+  };
+  const sharePage = () => {
+    const current = pages[Math.min(page, pages.length - 1)];
+    Share.share({ message: shareText(data, current, cityLabel, language) }).catch(() => {});
   };
   const showCalculationInfo = () =>
     Alert.alert(
@@ -86,10 +91,17 @@ export function DayPanel({ data, language, cityLabel, upcoming, upcomingLoading 
               </View>
             ))}
         </ScrollView>
-        <View style={styles.dots}>
-          {pages.map((item, index) => (
-            <View key={item.key} style={[styles.dot, index === page && styles.dotActive]} />
-          ))}
+        <View style={styles.footer}>
+          <View style={styles.dots}>
+            {pages.map((item, index) => (
+              <View key={item.key} style={[styles.dot, index === page && styles.dotActive]} />
+            ))}
+          </View>
+          <Pressable accessibilityRole="button" accessibilityLabel={te ? 'పంచుకోండి' : 'Share'} hitSlop={8} onPress={sharePage} style={({ pressed }) => [styles.shareButton, pressed && styles.sharePressed]}>
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+              <Path d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M7 10H5.5A1.5 1.5 0 0 0 4 11.5v8A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5v-8a1.5 1.5 0 0 0-1.5-1.5H17" stroke={colors.white} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          </Pressable>
         </View>
       </View>
     </View>
@@ -122,7 +134,10 @@ const styles = StyleSheet.create({
   festivalName: { flexShrink: 1, color: colors.ink, fontSize: 13, fontWeight: '600' },
   festivalChip: { color: colors.maroon, backgroundColor: colors.peach, fontSize: 11, fontWeight: '800', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' },
   empty: { color: colors.muted, fontSize: 13 },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 8 },
+  footer: { height: 40, marginTop: 6, justifyContent: 'center' },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  shareButton: { position: 'absolute', right: 0, width: 38, height: 38, borderRadius: 19, backgroundColor: colors.orange, alignItems: 'center', justifyContent: 'center', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.25, shadowRadius: 6, elevation: 3 },
+  sharePressed: { opacity: 0.75 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.line },
   dotActive: { backgroundColor: colors.orange },
 });

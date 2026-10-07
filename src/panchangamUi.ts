@@ -1,5 +1,5 @@
 import type { FestivalItem, PanchangamResponse } from './api/types';
-import { formatClock, formatClockOn, formatTime } from './format';
+import { formatClock, formatClockOn, formatDateLong, formatTime } from './format';
 import type { AppLanguage } from './settings';
 
 export const weekdayTeShort = ['ఆది', 'సోమ', 'మంగళ', 'బుధ', 'గురు', 'శుక్ర', 'శని'];
@@ -180,4 +180,14 @@ export function dayPages(day: PanchangamResponse, language: AppLanguage = 'te', 
       ],
     },
   ];
+}
+
+// Plain-text version of one panel page, for the share sheet.
+export function shareText(day: PanchangamResponse, page: InfoPage, cityLabel: string, language: AppLanguage = 'te'): string {
+  const lines = [`${page.title} · ${formatDateLong(day.date)}`, cityLabel, ''];
+  if (page.text) lines.push(page.text);
+  if (page.festivals) lines.push(...page.festivals.map((f) => `✦ ${f.name} – ${f.date}`));
+  lines.push(...page.rows.map((row) => `${row.label}: ${row.value.replace(/\n/g, ', ')}`));
+  lines.push('', language === 'te' ? '— SoHum పంచాంగం' : '— SoHum Panchangam');
+  return lines.join('\n');
 }
