@@ -11,7 +11,7 @@ import { HomeTempleContent } from '../../src/components/HomeTempleContent';
 import { DetailCard } from '../../src/components/DetailCard';
 import { colors } from '../../src/theme';
 import { addDays, formatDateLong, formatTime, isoDate } from '../../src/format';
-import { muhurtaCardTitle, muhurtaLines, panchangamCardTitle, primaryDayLines, sankalpamCardTitle } from '../../src/panchangamUi';
+import { muhurtaCardTitle, muhurtaLines, sankalpamCardTitle } from '../../src/panchangamUi';
 import { PANCHANGAM_CITIES, usePanchangamSettings } from '../../src/settings';
 import { railStyles, useRailMetrics } from '../../src/rail';
 
@@ -110,7 +110,7 @@ export default function TodayScreen() {
           </View>
         </View>
 
-        <HomeTempleContent language={language} festivals={festivalItems} festivalError={festivalError} monthlyFestivals={monthlyItems} monthlyError={monthlyError} onSelectFestival={selectFestival} onViewFestivals={() => setFestivalsOpen(true)} />
+        <HomeTempleContent language={language} panchangam={data} panchangamError={error} festivals={festivalItems} festivalError={festivalError} monthlyFestivals={monthlyItems} monthlyError={monthlyError} onSelectFestival={selectFestival} onViewFestivals={() => setFestivalsOpen(true)} />
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{telugu ? 'రోజు వివరాలు' : 'Day details'}</Text>
@@ -126,7 +126,6 @@ export default function TodayScreen() {
           </Pressable>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={snapInterval} contentContainerStyle={railStyles.cardRail}>
-          <DetailCard title={panchangamCardTitle(telugu)} lines={primaryDayLines(data, language)} style={{ ...railCard, ...styles.detailCard }} />
           <DetailCard title={muhurtaCardTitle(telugu)} lines={muhurtaLines(data, language)} style={{ ...railCard, ...styles.detailCard }} />
           <Card style={[railCard, styles.detailCard]}>
             <Text style={railStyles.panelTitle}>{sankalpamCardTitle(telugu)}</Text>

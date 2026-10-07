@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Modal, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchStotrams, fetchTempleNews, type Stotram, type TempleNews } from '../api/temple';
-import type { FestivalItem } from '../api/types';
+import type { FestivalItem, PanchangamResponse } from '../api/types';
 import { formatDateLong, formatDateParts } from '../format';
 import type { AppLanguage } from '../settings';
 import { HomeFeatured } from './HomeFeatured';
 import { festivalArtwork, newsArtwork, stotramArtwork } from '../homeArtwork';
 
-export function HomeTempleContent({ language, festivals, festivalError, monthlyFestivals, monthlyError, onSelectFestival, onViewFestivals }: {
+export function HomeTempleContent({ language, panchangam, panchangamError, festivals, festivalError, monthlyFestivals, monthlyError, onSelectFestival, onViewFestivals }: {
   language: AppLanguage;
+  panchangam: PanchangamResponse | null;
+  panchangamError?: string | null;
   festivals: FestivalItem[] | null;
   festivalError?: string | null;
   monthlyFestivals: FestivalItem[] | null;
@@ -53,7 +55,7 @@ export function HomeTempleContent({ language, festivals, festivalError, monthlyF
   </ScrollView>;
 
   return <>
-    {hymns?.length ? <HomeFeatured stotrams={hymns} language={language} onRead={setReading} /> : status(stotrams, errors.stotrams)}
+    <HomeFeatured panchangam={panchangam} panchangamError={panchangamError} stotrams={hymns} stotramError={errors.stotrams} language={language} onRead={setReading} />
     {section(listTitles.monthly, monthlyFestivals?.length ? () => setList('monthly') : undefined)}
     {status(monthlyFestivals, !!monthlyError, monthlyEmpty)}
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
