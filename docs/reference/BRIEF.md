@@ -47,11 +47,42 @@ Screenshots of the Vaidika Vignanam app are in this folder (`docs/reference/`). 
 - `muhurta.durmuhurtham` and `yoga.name_te` / `karana.name_te` are optional. Show them only when present.
 - Reuse the existing helpers. Don't hardcode panchang values in UI code.
 
+## Temple content APIs (stotrams, news, gallery)
+Stotrams and other temple content come from the Cheruvugattu temple backend, not the panchangam API.
+- **Base URL:** `https://spjrsd-backend.onrender.com/api`. The app already calls it for sevas: copy the pattern in `src/api/temple.ts` (`TEMPLE_API_BASE`, typed `fetch`, throw on `!res.ok`).
+- **Read only:** use only the public `GET` routes below. Never call `/admin/...` routes, `POST` routes or anything that needs login.
+- **Speed:** the backend is on Render and can take several seconds on a cold start. Show a loading state, and don't let these calls block the panchangam screens.
+
+| Route | Returns |
+|---|---|
+| `GET /stotrams` | Active stotrams in display order. Optional `?seva_id=` filter |
+| `GET /stotrams/slug/{slug}` | One active stotram by slug (404 if not found) |
+| `GET /stotrams/{id}` | One stotram by id |
+| `GET /news` | Up to 50 active announcements, newest first; past `event_date` items are already filtered out |
+| `GET /news/{id}` | One announcement |
+| `GET /live-blog` | Live-blog posts, pinned first. Optional `?event_name=`, `?limit=` |
+| `GET /live-blog/events` | Distinct event names with active posts |
+| `GET /gallery` | Up to 50 temple photos/videos. Optional `?media_type=PHOTO` |
+| `GET /sevas`, `GET /sevas/{id}` | Sevas (already typed as `Seva` in `src/api/temple.ts`) |
+
+**Fields:**
+- **Stotram:**
+  - `id`, `slug`, `title`, `title_telugu`, `text_telugu` (the full text, Telugu script, may be long), `deity` (e.g. `"Shiva"`);
+  - `seva_id` (or `null`), `display_order`, `active_flag`, `created_at`.
+- **News:** `id`, `title`, `title_telugu`, `content`, `content_telugu`, `is_important`, `event_date` (`YYYY-MM-DD` or `null`), `active_flag`, `created_at`.
+- **Live blog:** `id`, `event_name`, `event_name_telugu`, `title`, `title_telugu`, `content`, `content_telugu`, `image_url`, `is_pinned`, `posted_at`.
+- **Gallery:** `id`, `title`, `image_url`, `category` (e.g. `"Deities"`, `"Temple"`), `media_type` (e.g. `"PHOTO"`), `created_at`.
+
+**Notes:**
+- `image_url` may be absolute (Cloudflare R2) or a relative path like `/Assets/Main_Temple_Full_View_Up_Hill.webp`. Relative paths are served from `https://cheruvugattu.online`, so prefix that origin.
+- The temple's own gallery photos are the right artwork for Home-style image cards, instead of copying the reference app's images.
+- Telugu fields (`*_telugu`) can be empty strings. Fall back to the English field.
+
 ## Suggested priorities
 1. **Calendar tab:** restyle the header, month nav and grid to match IMG_6162, and polish DayPanel spacing and typography against IMG_6162–6167.
 2. **Tab bar:** outline icons, orange active state with a top indicator bar.
 3. **More tab:** settings-style icon rows and segmented tabs (IMG_6169–6171).
-4. **Optional:** turn Today into a Home-style feed (today's panchang summary card, upcoming-festival rail, stotram rail), using only data and assets we own.
+4. **Optional:** turn Today into a Home-style feed (today's panchang summary card, upcoming-festival rail, stotram rail, temple news), using only data and assets we own. Stotrams, news and temple photos come from the temple content APIs above; add typed fetchers for them in `src/api/temple.ts`.
 
 ## Verify before opening the PR
 - `npx tsc --noEmit` passes.
