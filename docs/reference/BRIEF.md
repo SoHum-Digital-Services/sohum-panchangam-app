@@ -43,6 +43,11 @@ Screenshots of the Vaidika Vignanam app are in this folder (`docs/reference/`). 
 
 ## Data rules (important)
 - The API is `https://sohum.cc` (which proxies `/v1/*` to the panchangam backend). Use `GET /v1/panchangam`, `POST /v1/panchangam/range` and `GET /v1/festivals`.
+- **Monthly observances** (Ekadashi, Pournami, Amavasya, Sankashta Chaturthi, Masa Shivaratri, Shani Trayodashi, Pitru Tarpanam, Maha Shivaratri) come from `GET /v1/tithi-days?start_date=&end_date=&latitude=&longitude=`. It returns `days.<type>` lists of `{date, weekday, tithi_at_sunrise}`.
+  - Use `masa_shivaratri` (sunset rule), not `masa_shivaratri_midnight`.
+  - Show `pitru_tarpanam` only when `differs_from_amavasya` is true, so it doesn't repeat Amavasya.
+  - Big festivals stay on `GET /v1/festivals`.
+- **Pradosham is not in the API.** Leave it out rather than computing or guessing it.
 - **Never invent values.** The API does **not** provide Amrita Kalam or the rashi end time, so leave them out.
 - `muhurta.durmuhurtham` and `yoga.name_te` / `karana.name_te` are optional. Show them only when present.
 - Reuse the existing helpers. Don't hardcode panchang values in UI code.
