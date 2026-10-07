@@ -115,3 +115,19 @@ export interface FestivalItem {
   date: string;
   weekday: string;
 }
+
+export type MonthlyObservanceType = 'ekadashi' | 'pournami' | 'amavasya' | 'sankashta_chaturthi' | 'masa_shivaratri' | 'shani_trayodashi' | 'pradosham' | 'pitru_tarpanam' | 'maha_shivaratri';
+
+export interface TithiDay {
+  date: string;
+  weekday: string;
+  tithi_at_sunrise: number;
+  differs_from_amavasya?: boolean;
+  paksha?: 'Shukla' | 'Krishna';
+  title?: string;
+  title_te?: string;
+}
+
+export interface TithiDaysResponse {
+  days: Partial<Record<MonthlyObservanceType, TithiDay[]>>;
+}

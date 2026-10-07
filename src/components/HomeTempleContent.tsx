@@ -8,10 +8,12 @@ import type { AppLanguage } from '../settings';
 import { HomeFeatured } from './HomeFeatured';
 import { festivalArtwork, newsArtwork, stotramArtwork } from '../homeArtwork';
 
-export function HomeTempleContent({ language, festivals, festivalError, onSelectFestival, onViewFestivals }: {
+export function HomeTempleContent({ language, festivals, festivalError, monthlyFestivals, monthlyError, onSelectFestival, onViewFestivals }: {
   language: AppLanguage;
   festivals: FestivalItem[] | null;
   festivalError?: string | null;
+  monthlyFestivals: FestivalItem[] | null;
+  monthlyError?: string | null;
   onSelectFestival: (date: string) => void;
   onViewFestivals: () => void;
 }) {
@@ -34,7 +36,6 @@ export function HomeTempleContent({ language, festivals, festivalError, onSelect
   }, []);
   const mantras = stotrams?.filter((item) => /(?:^|-)mantras?(?:-|$)/.test(item.slug)) ?? null;
   const hymns = stotrams?.filter((item) => !/(?:^|-)mantras?(?:-|$)/.test(item.slug)) ?? null;
-  const monthlyFestivals = festivals?.filter((item) => /^(?:amavasya|purnima|pournami|pradosham?|masa shivaratri|masik shivaratri|sankatahara chaturthi|sankashti chaturthi|ekadashi|ekadasi)$/i.test(item.name.trim())) ?? null;
   const listTitles = {
     stotrams: te ? 'స్తోత్రాలు' : 'Stotrams',
     mantras: te ? 'మంత్రాలు' : 'Mantras',
@@ -54,7 +55,7 @@ export function HomeTempleContent({ language, festivals, festivalError, onSelect
   return <>
     {hymns?.length ? <HomeFeatured stotrams={hymns} language={language} onRead={setReading} /> : status(stotrams, errors.stotrams)}
     {section(listTitles.monthly, monthlyFestivals?.length ? () => setList('monthly') : undefined)}
-    {status(monthlyFestivals, !!festivalError, monthlyEmpty)}
+    {status(monthlyFestivals, !!monthlyError, monthlyEmpty)}
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
       {monthlyFestivals?.slice(0, 8).map((item) => {
         const date = formatDateParts(item.date);
@@ -103,7 +104,7 @@ export function HomeTempleContent({ language, festivals, festivalError, onSelect
             {'text_telugu' in reading && !te && <Text style={styles.note}>Original Telugu text</Text>}
             <Text style={styles.body}>{body}</Text>
             <Pressable accessibilityRole="button" style={styles.share} onPress={() => { Share.share({ message: `${title(reading)}\n\n${body}` }).catch(() => {}); }}><Text style={styles.shareText}>{te ? 'పంచుకోండి' : 'Share'}</Text></Pressable>
-          </> : list === 'monthly' ? <>{status(monthlyFestivals, !!festivalError, monthlyEmpty)}{monthlyFestivals?.map((item) => <Pressable key={`${item.key}-${item.date}`} accessibilityRole="button" onPress={() => { setList(null); onSelectFestival(item.date); }} style={styles.listRow}><Text style={styles.listTitle}>{te ? item.name_te || item.name : item.name}</Text><Text style={styles.note}>{formatDateLong(item.date)}</Text></Pressable>)}</> : <>{status(listItems, list === 'news' ? errors.news : errors.stotrams)}{listItems?.map((item) => <Pressable key={item.id} accessibilityRole="button" onPress={() => setReading(item)} style={styles.listRow}><Text style={styles.listTitle}>{title(item)}</Text>{'event_date' in item && item.event_date && <Text style={styles.note}>{formatDateLong(item.event_date)}</Text>}</Pressable>)}</>}
+          </> : list === 'monthly' ? <>{status(monthlyFestivals, !!monthlyError, monthlyEmpty)}{monthlyFestivals?.map((item) => <Pressable key={`${item.key}-${item.date}`} accessibilityRole="button" onPress={() => { setList(null); onSelectFestival(item.date); }} style={styles.listRow}><Text style={styles.listTitle}>{te ? item.name_te || item.name : item.name}</Text><Text style={styles.note}>{formatDateLong(item.date)}</Text></Pressable>)}</> : <>{status(listItems, list === 'news' ? errors.news : errors.stotrams)}{listItems?.map((item) => <Pressable key={item.id} accessibilityRole="button" onPress={() => setReading(item)} style={styles.listRow}><Text style={styles.listTitle}>{title(item)}</Text>{'event_date' in item && item.event_date && <Text style={styles.note}>{formatDateLong(item.event_date)}</Text>}</Pressable>)}</>}
         </ScrollView>
       </View>
     </Modal>

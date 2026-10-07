@@ -15,6 +15,12 @@ const paroksha = require('../assets/home-illustrations/news-traditional.jpg');
 const diya = require('../assets/home-illustrations/diya.jpg');
 
 const festivalImages: Record<string, ImageSourcePropType> = {
+  pradosham: shiva,
+  masa_shivaratri: shiva,
+  maha_shivaratri: shiva,
+  shani_trayodashi: diya,
+  amavasya,
+  pitru_tarpanam: diya,
   yatinam_mahalaya: mahalaya,
   bathukamma_begins: bathukamma,
   saddula_bathukamma: bathukamma,

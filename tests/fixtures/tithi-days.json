@@ -1,0 +1,422 @@
+{
+  "start_date": "2026-10-07",
+  "end_date": "2027-04-07",
+  "days": {
+    "ekadashi": [
+      {
+        "date": "2026-10-22",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 11
+      },
+      {
+        "date": "2026-11-05",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 26
+      },
+      {
+        "date": "2026-11-20",
+        "weekday": "Friday",
+        "tithi_at_sunrise": 11
+      },
+      {
+        "date": "2026-12-04",
+        "weekday": "Friday",
+        "tithi_at_sunrise": 26
+      },
+      {
+        "date": "2026-12-20",
+        "weekday": "Sunday",
+        "tithi_at_sunrise": 11
+      },
+      {
+        "date": "2027-01-03",
+        "weekday": "Sunday",
+        "tithi_at_sunrise": 26
+      },
+      {
+        "date": "2027-01-18",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 11
+      },
+      {
+        "date": "2027-02-02",
+        "weekday": "Tuesday",
+        "tithi_at_sunrise": 26
+      },
+      {
+        "date": "2027-02-17",
+        "weekday": "Wednesday",
+        "tithi_at_sunrise": 11
+      },
+      {
+        "date": "2027-03-03",
+        "weekday": "Wednesday",
+        "tithi_at_sunrise": 26
+      },
+      {
+        "date": "2027-03-18",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 11
+      },
+      {
+        "date": "2027-04-02",
+        "weekday": "Friday",
+        "tithi_at_sunrise": 26
+      }
+    ],
+    "pournami": [
+      {
+        "date": "2026-10-26",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 15
+      },
+      {
+        "date": "2026-11-24",
+        "weekday": "Tuesday",
+        "tithi_at_sunrise": 15
+      },
+      {
+        "date": "2026-12-24",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 15
+      },
+      {
+        "date": "2027-01-22",
+        "weekday": "Friday",
+        "tithi_at_sunrise": 15
+      },
+      {
+        "date": "2027-02-20",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 14
+      },
+      {
+        "date": "2027-03-22",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 15
+      }
+    ],
+    "amavasya": [
+      {
+        "date": "2026-10-10",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 30
+      },
+      {
+        "date": "2026-11-09",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 30
+      },
+      {
+        "date": "2026-12-08",
+        "weekday": "Tuesday",
+        "tithi_at_sunrise": 30
+      },
+      {
+        "date": "2027-01-07",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 30
+      },
+      {
+        "date": "2027-02-06",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 30
+      },
+      {
+        "date": "2027-03-08",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 30
+      },
+      {
+        "date": "2027-04-06",
+        "weekday": "Tuesday",
+        "tithi_at_sunrise": 30
+      }
+    ],
+    "pitru_tarpanam": [
+      {
+        "date": "2026-10-10",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 30,
+        "differs_from_amavasya": false
+      },
+      {
+        "date": "2026-11-08",
+        "weekday": "Sunday",
+        "tithi_at_sunrise": 29,
+        "differs_from_amavasya": true
+      },
+      {
+        "date": "2026-12-08",
+        "weekday": "Tuesday",
+        "tithi_at_sunrise": 30,
+        "differs_from_amavasya": false
+      },
+      {
+        "date": "2027-01-07",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 30,
+        "differs_from_amavasya": false
+      },
+      {
+        "date": "2027-02-06",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 30,
+        "differs_from_amavasya": false
+      },
+      {
+        "date": "2027-03-07",
+        "weekday": "Sunday",
+        "tithi_at_sunrise": 29,
+        "differs_from_amavasya": true
+      },
+      {
+        "date": "2027-04-06",
+        "weekday": "Tuesday",
+        "tithi_at_sunrise": 30,
+        "differs_from_amavasya": false
+      }
+    ],
+    "sankashta_chaturthi": [
+      {
+        "date": "2026-10-29",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 19
+      },
+      {
+        "date": "2026-11-27",
+        "weekday": "Friday",
+        "tithi_at_sunrise": 18
+      },
+      {
+        "date": "2026-12-27",
+        "weekday": "Sunday",
+        "tithi_at_sunrise": 19
+      },
+      {
+        "date": "2027-01-25",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 18
+      },
+      {
+        "date": "2027-02-24",
+        "weekday": "Wednesday",
+        "tithi_at_sunrise": 19
+      },
+      {
+        "date": "2027-03-25",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 18
+      }
+    ],
+    "masa_shivaratri": [
+      {
+        "date": "2026-10-09",
+        "weekday": "Friday",
+        "tithi_at_sunrise": 29
+      },
+      {
+        "date": "2026-11-07",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2026-12-07",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 29
+      },
+      {
+        "date": "2027-01-06",
+        "weekday": "Wednesday",
+        "tithi_at_sunrise": 29
+      },
+      {
+        "date": "2027-02-04",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2027-03-06",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2027-04-05",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 29
+      }
+    ],
+    "masa_shivaratri_midnight": [
+      {
+        "date": "2026-10-08",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2026-11-07",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2026-12-07",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 29
+      },
+      {
+        "date": "2027-01-05",
+        "weekday": "Tuesday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2027-02-04",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2027-03-06",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2027-04-05",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 29
+      }
+    ],
+    "maha_shivaratri": [
+      {
+        "date": "2027-03-06",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 28
+      }
+    ],
+    "shani_trayodashi": [
+      {
+        "date": "2026-10-24",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 13
+      },
+      {
+        "date": "2026-11-07",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2027-03-06",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 28
+      },
+      {
+        "date": "2027-03-20",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 13
+      }
+    ],
+    "pradosham": [
+      {
+        "date": "2026-10-08",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 28,
+        "paksha": "Krishna",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2026-10-23",
+        "weekday": "Friday",
+        "tithi_at_sunrise": 12,
+        "paksha": "Shukla",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2026-11-06",
+        "weekday": "Friday",
+        "tithi_at_sunrise": 27,
+        "paksha": "Krishna",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2026-11-22",
+        "weekday": "Sunday",
+        "tithi_at_sunrise": 13,
+        "paksha": "Shukla",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2026-12-06",
+        "weekday": "Sunday",
+        "tithi_at_sunrise": 28,
+        "paksha": "Krishna",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2026-12-21",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 12,
+        "paksha": "Shukla",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2027-01-04",
+        "weekday": "Monday",
+        "tithi_at_sunrise": 27,
+        "paksha": "Krishna",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2027-01-20",
+        "weekday": "Wednesday",
+        "tithi_at_sunrise": 13,
+        "paksha": "Shukla",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2027-02-03",
+        "weekday": "Wednesday",
+        "tithi_at_sunrise": 27,
+        "paksha": "Krishna",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2027-02-18",
+        "weekday": "Thursday",
+        "tithi_at_sunrise": 12,
+        "paksha": "Shukla",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2027-03-05",
+        "weekday": "Friday",
+        "tithi_at_sunrise": 27,
+        "paksha": "Krishna",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      },
+      {
+        "date": "2027-03-20",
+        "weekday": "Saturday",
+        "tithi_at_sunrise": 13,
+        "paksha": "Shukla",
+        "title": "Maha Pradosham (Shani Pradosham)",
+        "title_te": "మహా ప్రదోషం (శని ప్రదోషం)"
+      },
+      {
+        "date": "2027-04-04",
+        "weekday": "Sunday",
+        "tithi_at_sunrise": 28,
+        "paksha": "Krishna",
+        "title": "Pradosham",
+        "title_te": "ప్రదోషం"
+      }
+    ]
+  }
+}

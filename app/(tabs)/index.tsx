@@ -4,7 +4,7 @@ import { useFocusEffect, useIsFocused } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
-import { fetchFestivals, fetchPanchangam } from '../../src/api/client';
+import { fetchFestivals, fetchMonthlyObservances, fetchPanchangam } from '../../src/api/client';
 import type { FestivalItem, PanchangamResponse } from '../../src/api/types';
 import { Card } from '../../src/components/Card';
 import { HomeTempleContent } from '../../src/components/HomeTempleContent';
@@ -32,9 +32,12 @@ export default function TodayScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [festivalsOpen, setFestivalsOpen] = useState(false);
   const [festivalResult, setFestivalResult] = useState<{ key: string; items: FestivalItem[]; error?: string } | null>(null);
+  const [monthlyResult, setMonthlyResult] = useState<{ key: string; items: FestivalItem[]; error?: string } | null>(null);
   const cacheKey = `${city.slug}:${selectedDate}`;
   const data = cache[cacheKey] ?? null;
   const festivalItems = festivalResult?.key === cacheKey ? festivalResult.items : null;
+  const monthlyItems = monthlyResult?.key === cacheKey ? monthlyResult.items : null;
+  const monthlyError = monthlyResult?.key === cacheKey ? monthlyResult.error : null;
   const festivalError = festivalResult?.key === cacheKey ? festivalResult.error : null;
 
   const load = useCallback(async (date: string, force = false) => {
@@ -62,6 +65,14 @@ export default function TodayScreen() {
     fetchFestivals(selectedDate, addDays(selectedDate, 60), city)
       .then((items) => { if (active) setFestivalResult({ key: cacheKey, items }); })
       .catch((e) => { if (active) setFestivalResult({ key: cacheKey, items: [], error: e instanceof Error ? e.message : 'Failed to load festivals' }); });
+    return () => { active = false; };
+  }, [selectedDate, city, cacheKey]));
+
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    fetchMonthlyObservances(selectedDate, addDays(selectedDate, 60), city)
+      .then((items) => { if (active) setMonthlyResult({ key: cacheKey, items }); })
+      .catch((e) => { if (active) setMonthlyResult({ key: cacheKey, items: [], error: e instanceof Error ? e.message : 'Failed to load monthly observances' }); });
     return () => { active = false; };
   }, [selectedDate, city, cacheKey]));
 
@@ -99,7 +110,7 @@ export default function TodayScreen() {
           </View>
         </View>
 
-        <HomeTempleContent language={language} festivals={festivalItems} festivalError={festivalError} onSelectFestival={selectFestival} onViewFestivals={() => setFestivalsOpen(true)} />
+        <HomeTempleContent language={language} festivals={festivalItems} festivalError={festivalError} monthlyFestivals={monthlyItems} monthlyError={monthlyError} onSelectFestival={selectFestival} onViewFestivals={() => setFestivalsOpen(true)} />
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{telugu ? 'రోజు వివరాలు' : 'Day details'}</Text>
