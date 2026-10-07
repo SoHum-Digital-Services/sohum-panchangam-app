@@ -1,13 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
-import { fetchPanchangam } from '../../src/api/client';
-import type { PanchangamResponse } from '../../src/api/types';
+import { useFocusEffect, useIsFocused } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Path } from 'react-native-svg';
+import { fetchFestivals, fetchPanchangam } from '../../src/api/client';
+import type { FestivalItem, PanchangamResponse } from '../../src/api/types';
 import { Card } from '../../src/components/Card';
+import { HomeTempleContent } from '../../src/components/HomeTempleContent';
 import { DetailCard } from '../../src/components/DetailCard';
 import { colors } from '../../src/theme';
-import { addDays, formatDateLong, formatDateParts, formatTime, isoDate } from '../../src/format';
-import { muhurtaCardTitle, muhurtaLines, pakshaTe, panchangamCardTitle, primaryDayLines, sankalpamCardTitle, weekdayShort } from '../../src/panchangamUi';
+import { addDays, formatDateLong, formatTime, isoDate } from '../../src/format';
+import { muhurtaCardTitle, muhurtaLines, panchangamCardTitle, primaryDayLines, sankalpamCardTitle } from '../../src/panchangamUi';
 import { PANCHANGAM_CITIES, usePanchangamSettings } from '../../src/settings';
 import { railStyles, useRailMetrics } from '../../src/rail';
 
@@ -15,6 +19,9 @@ const TODAY = isoDate(new Date());
 
 export default function TodayScreen() {
   const { city, setCity, language, setLanguage } = usePanchangamSettings();
+  const focused = useIsFocused();
+  const insets = useSafeAreaInsets();
+  const scroll = useRef<ScrollView>(null);
   const telugu = language === 'te';
   const { cardWidth, snapInterval } = useRailMetrics();
   const railCard = { width: cardWidth };
@@ -23,18 +30,20 @@ export default function TodayScreen() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const data = cache[selectedDate] ?? null;
-
-  useEffect(() => {
-    setCache({});
-  }, [city.slug]);
+  const [festivalsOpen, setFestivalsOpen] = useState(false);
+  const [festivalResult, setFestivalResult] = useState<{ key: string; items: FestivalItem[]; error?: string } | null>(null);
+  const cacheKey = `${city.slug}:${selectedDate}`;
+  const data = cache[cacheKey] ?? null;
+  const festivalItems = festivalResult?.key === cacheKey ? festivalResult.items : null;
+  const festivalError = festivalResult?.key === cacheKey ? festivalResult.error : null;
 
   const load = useCallback(async (date: string, force = false) => {
-    if (!force && cache[date]) return;
+    const key = `${city.slug}:${date}`;
+    if (!force && cache[key]) return;
     try {
       setError(null);
       const result = await fetchPanchangam(date, city);
-      setCache((current) => ({ ...current, [date]: result }));
+      setCache((current) => ({ ...current, [key]: result }));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load panchangam');
     } finally {
@@ -48,197 +57,98 @@ export default function TodayScreen() {
     }, [load, selectedDate]),
   );
 
-  const dateStrip = useMemo(() => [-2, -1, 0, 1, 2].map((offset) => addDays(selectedDate, offset)), [selectedDate]);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    fetchFestivals(selectedDate, addDays(selectedDate, 60), city)
+      .then((items) => { if (active) setFestivalResult({ key: cacheKey, items }); })
+      .catch((e) => { if (active) setFestivalResult({ key: cacheKey, items: [], error: e instanceof Error ? e.message : 'Failed to load festivals' }); });
+    return () => { active = false; };
+  }, [selectedDate, city, cacheKey]));
 
   const onRefresh = () => {
     setRefreshing(true);
     load(selectedDate, true);
   };
-
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
-
-  if (!data) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator color={colors.orange} size="large" />
-      </View>
-    );
-  }
+  const selectFestival = (date: string) => {
+    setSelectedDate(date);
+    setFestivalsOpen(false);
+    scroll.current?.scrollTo({ y: 0, animated: true });
+  };
 
   return (
     <ScrollView
+      ref={scroll}
       style={styles.screen}
       contentContainerStyle={styles.shell}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.orange} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#f15a06" />}
     >
+      {focused && <StatusBar style="light" />}
       <View style={styles.appFrame}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
           <View style={styles.brandRow}>
-            <View style={styles.logoBadge}>
-              <Text style={styles.logoBadgeText}>ఓం</Text>
-            </View>
+            <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'సెట్టింగులు తెరవండి' : 'Open settings'} onPress={() => setSettingsOpen(true)} style={({ pressed }) => [styles.settingsDot, pressed && styles.pressedControl]}>
+              <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                <Circle cx={12} cy={8} r={3.5} stroke="#fff" strokeWidth={1.8} />
+                <Path d="M5 21v-3a7 7 0 0 1 14 0v3" stroke="#fff" strokeWidth={1.8} strokeLinecap="round" />
+              </Svg>
+            </Pressable>
             <View style={styles.brandCopy}>
               <Text style={styles.brand}>{telugu ? 'SoHum పంచాంగం' : 'SoHum Panchangam'}</Text>
-              <Text style={styles.location}>⌖ {telugu ? city.name_te : city.name_en}</Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Open settings"
-              hitSlop={10}
-              onPress={() => setSettingsOpen(true)}
-              style={({ pressed }) => [styles.settingsDot, pressed && styles.pressedControl]}
-            >
-              <Text style={styles.settingsDotText}>⚙</Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.datePanel}>
-            <View style={styles.dayNav}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Previous day"
-              hitSlop={8}
-              onPress={() => setSelectedDate(addDays(data.date, -1))}
-              style={({ pressed }) => [styles.arrowButton, pressed && styles.arrowButtonPressed]}
-            >
-              <Text style={styles.arrowText}>‹</Text>
-            </Pressable>
-              <View style={styles.dayTitle}>
-                <Text style={styles.vara}>{telugu ? data.vara.name_te : data.vara.name_en}</Text>
-                <Text style={styles.date}>{formatDateLong(data.date)}</Text>
-                <Text style={styles.monthLine}>{telugu ? `${data.lunar_month.name_te} · ${pakshaTe(data.tithi.paksha)} పక్షం` : `${data.lunar_month.name_en} · ${data.tithi.paksha} Paksha`}</Text>
-              </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Next day"
-              hitSlop={8}
-              onPress={() => {
-                const nextDate = addDays(data.date, 1);
-                setSelectedDate(nextDate);
-              }}
-              style={({ pressed }) => [styles.arrowButton, pressed && styles.arrowButtonPressed]}
-            >
-              <Text style={styles.arrowText}>›</Text>
-            </Pressable>
-            </View>
-
-            <View style={styles.dateStrip}>
-              {dateStrip.map((date) => {
-                const itemParts = formatDateParts(date);
-                const active = date === selectedDate;
-                return (
-                  <Pressable
-                    key={date}
-                    hitSlop={6}
-                    onPress={() => setSelectedDate(date)}
-                    style={({ pressed }) => [styles.datePill, active && styles.datePillActive, pressed && styles.pressedControl]}
-                  >
-                    <Text style={[styles.datePillWeekday, active && styles.datePillTextActive]}>{weekdayShort(date, language)}</Text>
-                    <Text style={[styles.datePillDay, active && styles.datePillTextActive]}>{itemParts.day}</Text>
-                  </Pressable>
-                );
-              })}
+              <Text style={styles.location}>{telugu ? city.name_te : city.name_en}</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.content}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{telugu ? 'ఈరోజు' : 'Today'}</Text>
-            <Text style={styles.swipeHint}>{telugu ? 'కార్డులను స్వైప్ చేయండి →' : 'Swipe cards →'}</Text>
-          </View>
+        <HomeTempleContent language={language} festivals={festivalItems} festivalError={festivalError} onSelectFestival={selectFestival} onViewFestivals={() => setFestivalsOpen(true)} />
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            decelerationRate="fast"
-            snapToInterval={snapInterval}
-            contentContainerStyle={railStyles.cardRail}
-          >
-            <Card style={[styles.heroCard, railCard]}>
-              <View style={styles.heroTopRow}>
-                <View style={styles.heroCopy}>
-                  <Text style={styles.heroLabel}>{telugu ? 'ఈరోజు తిథి' : 'Today’s tithi'}</Text>
-                  <Text style={styles.heroValue}>{telugu ? data.tithi.name_te : data.tithi.name_en}</Text>
-                  <Text style={styles.heroSub}>{telugu ? `${pakshaTe(data.tithi.paksha)} పక్షం` : `${data.tithi.paksha} Paksha`}</Text>
-                  <Text style={styles.heroSmall}>{telugu ? 'ముగింపు ' : 'Ends '}{formatTime(data.tithi.ends_at)}</Text>
-                </View>
-                <View style={styles.heroMoon}>
-                  <Text style={styles.heroMoonText}>◐</Text>
-                </View>
-              </View>
-              <View style={styles.sunGrid}>
-                <View style={styles.sunChip}>
-                  <Text style={styles.cardLabel}>🌅 {telugu ? 'సూర్యోదయం' : 'Sunrise'}</Text>
-                  <Text style={styles.compactValue}>{formatTime(data.sunrise)}</Text>
-                </View>
-                <View style={styles.sunChip}>
-                  <Text style={styles.cardLabel}>🌇 {telugu ? 'సూర్యాస్తమయం' : 'Sunset'}</Text>
-                  <Text style={styles.compactValue}>{formatTime(data.sunset)}</Text>
-                </View>
-              </View>
-            </Card>
-
-            <Card style={[styles.moonCard, railCard]}>
-              <View style={styles.heroTopRow}>
-                <View style={styles.heroCopy}>
-                  <Text style={styles.heroLabel}>{telugu ? 'చంద్రుడు' : 'Moon'}</Text>
-                  <Text style={styles.heroValue}>{telugu ? data.moon_rashi.name_te : data.moon_rashi.name_en}</Text>
-                  <Text style={styles.heroSub}>{telugu ? 'రాశి' : 'Rashi'}</Text>
-                </View>
-                <View style={railStyles.moonBadge}>
-                  <Text style={railStyles.moonIcon}>◐</Text>
-                </View>
-              </View>
-              <View style={styles.sunGrid}>
-                <View style={styles.sunChip}>
-                  <Text style={styles.cardLabel}>🌙 {telugu ? 'చంద్రోదయం' : 'Moonrise'}</Text>
-                  <Text style={styles.compactValue}>{formatTime(data.moonrise)}</Text>
-                </View>
-                <View style={styles.sunChip}>
-                  <Text style={styles.cardLabel}>🌑 {telugu ? 'చంద్రాస్తమయం' : 'Moonset'}</Text>
-                  <Text style={styles.compactValue}>{formatTime(data.moonset)}</Text>
-                </View>
-              </View>
-            </Card>
-
-            {data.festivals.length > 0 && (
-              <Card style={[railStyles.festivalCard, railCard]}>
-                <Text style={railStyles.panelTitle}>{telugu ? 'ఈరోజు విశేషం' : 'Today’s observance'}</Text>
-                {data.festivals.map((festival) => (
-                  <Text key={festival} style={railStyles.festivalText}>✦ {festival}</Text>
-                ))}
-              </Card>
-            )}
-          </ScrollView>
-
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{telugu ? 'వివరాలు' : 'Details'}</Text>
-            <Text style={styles.swipeHint}>{telugu ? 'కార్డులను స్వైప్ చేయండి →' : 'Swipe cards →'}</Text>
-          </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            decelerationRate="fast"
-            snapToInterval={snapInterval}
-            contentContainerStyle={railStyles.cardRail}
-          >
-            <DetailCard title={panchangamCardTitle(telugu)} lines={primaryDayLines(data, language)} style={railCard} />
-            <DetailCard title={muhurtaCardTitle(telugu)} lines={muhurtaLines(data, language)} style={railCard} />
-            <Card style={[railStyles.sankalpamCard, railCard]}>
-              <Text style={railStyles.panelTitle}>{sankalpamCardTitle(telugu)}</Text>
-              <Text style={railStyles.sankalpamText}>{data.sankalpam}</Text>
-            </Card>
-          </ScrollView>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{telugu ? 'రోజు వివరాలు' : 'Day details'}</Text>
         </View>
+        {error ? <Text style={styles.festivalStatus}>{error}</Text> : !data ? <ActivityIndicator color="#f15a06" style={styles.festivalStatus} /> : <>
+        <View style={styles.dayNav}>
+          <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'మునుపటి రోజు' : 'Previous day'} onPress={() => setSelectedDate(addDays(data.date, -1))} style={styles.arrowButton}>
+            <Text style={styles.arrowText}>‹</Text>
+          </Pressable>
+          <Text style={styles.date}>{formatDateLong(data.date)}</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'తదుపరి రోజు' : 'Next day'} onPress={() => setSelectedDate(addDays(data.date, 1))} style={styles.arrowButton}>
+            <Text style={styles.arrowText}>›</Text>
+          </Pressable>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={snapInterval} contentContainerStyle={railStyles.cardRail}>
+          <DetailCard title={panchangamCardTitle(telugu)} lines={primaryDayLines(data, language)} style={{ ...railCard, ...styles.detailCard }} />
+          <DetailCard title={muhurtaCardTitle(telugu)} lines={muhurtaLines(data, language)} style={{ ...railCard, ...styles.detailCard }} />
+          <Card style={[railCard, styles.detailCard]}>
+            <Text style={railStyles.panelTitle}>{sankalpamCardTitle(telugu)}</Text>
+            <Text style={railStyles.sankalpamText}>{data.sankalpam}</Text>
+          </Card>
+          <DetailCard title={telugu ? 'చంద్రుడు' : 'Moon'} lines={[
+            { label: telugu ? 'రాశి' : 'Rashi', value: telugu ? data.moon_rashi.name_te : data.moon_rashi.name_en },
+            { label: telugu ? 'చంద్రోదయం' : 'Moonrise', value: formatTime(data.moonrise) },
+            { label: telugu ? 'చంద్రాస్తమయం' : 'Moonset', value: formatTime(data.moonset) },
+          ]} style={{ ...railCard, ...styles.detailCard }} />
+        </ScrollView>
+        </>}
       </View>
+      <Modal transparent animationType="slide" visible={festivalsOpen} onRequestClose={() => setFestivalsOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.settingsSheet}>
+            <View style={styles.sheetHeader}>
+              <Text style={styles.sheetTitle}>{telugu ? 'రాబోయే పండుగలు' : 'Upcoming festivals'}</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'మూసివేయండి' : 'Close festivals'} onPress={() => setFestivalsOpen(false)} style={styles.closeButton}><Text style={styles.closeButtonText}>×</Text></Pressable>
+            </View>
+            <ScrollView style={styles.festivalList}>
+              {!festivalItems && <ActivityIndicator color="#f15a06" style={styles.festivalStatus} />}
+              {(festivalItems ?? []).map((festival) => (
+                <Pressable accessibilityRole="button" key={`${festival.key}-${festival.date}`} onPress={() => selectFestival(festival.date)} style={styles.festivalListRow}>
+                  <Text style={styles.festivalListName}>{telugu ? festival.name_te || festival.name : festival.name}</Text>
+                  <Text style={styles.festivalListDate}>{formatDateLong(festival.date)}</Text>
+                </Pressable>
+              ))}
+              {festivalItems?.length === 0 && <Text style={styles.festivalStatus}>{festivalError ?? (telugu ? 'రాబోయే పండుగలు లేవు' : 'No upcoming festivals found')}</Text>}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
       <SettingsModal
         citySlug={city.slug}
         language={language}
@@ -266,7 +176,7 @@ function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLang
               <Text style={styles.sheetEyebrow}>{telugu ? 'పంచాంగం సెట్టింగులు' : 'Panchangam settings'}</Text>
               <Text style={styles.sheetTitle}>{telugu ? 'స్థానం & పద్ధతి' : 'Location & method'}</Text>
             </View>
-            <Pressable accessibilityRole="button" accessibilityLabel="Close settings" hitSlop={8} onPress={onClose} style={styles.closeButton}>
+            <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'సెట్టింగులు మూసివేయండి' : 'Close settings'} hitSlop={8} onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>×</Text>
             </Pressable>
           </View>
@@ -299,54 +209,28 @@ function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLang
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.creamDeep },
+  screen: { flex: 1, backgroundColor: '#fff' },
   shell: { alignItems: 'center', minHeight: '100%' },
-  appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: colors.cream },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.cream, padding: 24 },
-  errorText: { color: colors.maroon, textAlign: 'center' },
-  header: { backgroundColor: colors.cream, paddingTop: 42, paddingBottom: 8, paddingHorizontal: 16 },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  logoBadge: { width: 40, height: 40, borderRadius: 14, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2 },
-  logoBadgeText: { color: colors.maroon, fontWeight: '800', fontSize: 17 },
+  appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: '#fff', paddingBottom: 24 },
+  header: { backgroundColor: '#f15a06', paddingBottom: 20, paddingHorizontal: 20 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   brandCopy: { flex: 1 },
-  brand: { color: colors.ink, fontWeight: '800', fontSize: 19 },
-  location: { color: colors.muted, marginTop: 3, fontWeight: '600', fontSize: 11 },
-  settingsDot: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
-  settingsDotText: { color: colors.maroon },
+  brand: { color: '#fff', fontWeight: '700', fontSize: 24, lineHeight: 36 },
+  location: { color: '#fff', marginTop: 2, fontSize: 12, lineHeight: 20 },
+  settingsDot: { width: 44, height: 44, borderRadius: 22, borderWidth: 1.5, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   pressedControl: { opacity: 0.72 },
-  datePanel: { marginTop: 14, borderRadius: 20, padding: 13, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 16, elevation: 3 },
-  dayNav: { minHeight: 72, width: '100%', alignItems: 'center', flexDirection: 'row', zIndex: 2 },
-  arrowButton: { width: 48, height: 48, borderRadius: 14, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center' },
-  arrowButtonPressed: { backgroundColor: '#ffffff28' },
-  arrowText: { color: colors.white, fontSize: 27, lineHeight: 30 },
-  dayTitle: { flex: 1, alignItems: 'center', paddingHorizontal: 8 },
-  vara: { color: colors.gold, fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
-  date: { color: colors.white, fontSize: 19, fontWeight: '800', marginTop: 2, textAlign: 'center', lineHeight: 24 },
-  monthLine: { color: '#ffe7d8', marginTop: 4, fontWeight: '600', fontSize: 12, textAlign: 'center' },
-  dateStrip: { flexDirection: 'row', gap: 7, marginTop: 13 },
-  datePill: { flex: 1, minHeight: 48, borderRadius: 15, borderWidth: 1, borderColor: '#ffffff21', backgroundColor: '#ffffff10', alignItems: 'center', justifyContent: 'center' },
-  datePillActive: { backgroundColor: colors.card, borderColor: colors.card },
-  datePillWeekday: { color: '#f5cfb5', fontWeight: '800', fontSize: 11 },
-  datePillDay: { color: '#f5cfb5', fontWeight: '800', fontSize: 18, marginTop: 1 },
-  datePillTextActive: { color: colors.maroon },
-  content: { paddingVertical: 8, gap: 8, paddingBottom: 22 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 18, marginTop: 2 },
-  sectionTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
-  swipeHint: { color: colors.muted, fontSize: 11, fontWeight: '700' },
-  heroCard: { backgroundColor: colors.card, borderColor: colors.line, padding: 14 },
-  moonCard: { backgroundColor: colors.card, borderColor: colors.line, padding: 14 },
-  heroTopRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  heroCopy: { flex: 1 },
-  heroLabel: { color: colors.orange, fontWeight: '800', fontSize: 11, letterSpacing: 0.3 },
-  heroValue: { color: colors.ink, fontSize: 26, fontWeight: '800', marginTop: 4, letterSpacing: -0.4 },
-  heroSub: { color: colors.muted, marginTop: 3, fontWeight: '600', fontSize: 13 },
-  heroSmall: { color: colors.maroon, marginTop: 8, fontWeight: '700', fontSize: 13 },
-  heroMoon: { width: 46, height: 46, borderRadius: 14, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
-  heroMoonText: { color: '#e8edf4', fontSize: 27 },
-  sunGrid: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  sunChip: { flex: 1, borderRadius: 14, backgroundColor: colors.peach, paddingVertical: 9, paddingHorizontal: 10 },
-  cardLabel: { color: colors.muted, fontWeight: '700', fontSize: 11 },
-  compactValue: { color: colors.ink, fontSize: 16, fontWeight: '800', marginTop: 3 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, justifyContent: 'space-between', paddingHorizontal: 16, marginTop: 16, marginBottom: 6 },
+  sectionTitle: { flex: 1, color: '#141c26', fontSize: 20, lineHeight: 32, fontWeight: '600' },
+  festivalStatus: { marginHorizontal: 16, marginVertical: 16, color: '#747474', fontSize: 14, lineHeight: 24 },
+  dayNav: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 16, marginBottom: 8 },
+  arrowButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#f15a06', alignItems: 'center', justifyContent: 'center' },
+  arrowText: { color: '#fff', fontSize: 27, lineHeight: 30 },
+  date: { flex: 1, color: '#141c26', fontSize: 14, fontWeight: '500', textAlign: 'center', lineHeight: 24 },
+  detailCard: { backgroundColor: '#fbf5e9', borderColor: '#f1ece4', borderRadius: 8 },
+  festivalList: { maxHeight: 420 },
+  festivalListRow: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  festivalListName: { color: '#141c26', fontSize: 16, lineHeight: 26 },
+  festivalListDate: { color: '#f15a06', fontSize: 12, lineHeight: 20, marginTop: 4 },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#291a1370' },
   settingsSheet: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28 },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
