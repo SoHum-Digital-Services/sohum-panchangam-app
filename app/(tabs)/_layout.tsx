@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { colors } from '../../src/theme';
 import { usePanchangamSettings } from '../../src/settings';
 
@@ -38,22 +39,22 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: telugu ? 'ఈరోజు' : 'Today',
+          title: telugu ? 'హోమ్' : 'Home',
           tabBarIcon: ({ focused }) => <TabIcon symbol="☀" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: telugu ? 'శోధన' : 'Search',
+          tabBarIcon: ({ color }) => <Svg width={22} height={22} viewBox="0 0 24 24" fill="none"><Circle cx={10} cy={10} r={7} stroke={color} strokeWidth={2} /><Path d="m15 15 6 6" stroke={color} strokeWidth={2} strokeLinecap="round" /></Svg>,
         }}
       />
       <Tabs.Screen
         name="calendar"
         options={{
-          title: telugu ? 'క్యాలెండర్' : 'Calendar',
+          title: telugu ? 'పంచాంగం' : 'Panchangam',
           tabBarIcon: ({ focused }) => <TabIcon symbol="▦" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="festivals"
-        options={{
-          title: telugu ? 'పండుగలు' : 'Festivals',
-          tabBarIcon: ({ focused }) => <TabIcon symbol="🪔" focused={focused} />,
         }}
       />
       <Tabs.Screen
