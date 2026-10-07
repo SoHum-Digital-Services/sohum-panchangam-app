@@ -1,18 +1,23 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { fetchPanchangam } from '../../src/api/client';
 import type { PanchangamResponse } from '../../src/api/types';
-import { TodayPanel } from '../../src/components/TodayPanel';
-import { addDays, isoDate } from '../../src/format';
-import { PANCHANGAM_CITIES, usePanchangamSettings } from '../../src/settings';
+import { Card } from '../../src/components/Card';
+import { DetailCard } from '../../src/components/DetailCard';
 import { colors } from '../../src/theme';
+import { addDays, formatDateLong, formatDateParts, formatTime, isoDate } from '../../src/format';
+import { muhurtaCardTitle, muhurtaLines, pakshaTe, panchangamCardTitle, primaryDayLines, sankalpamCardTitle, weekdayShort } from '../../src/panchangamUi';
+import { PANCHANGAM_CITIES, usePanchangamSettings } from '../../src/settings';
+import { railStyles, useRailMetrics } from '../../src/rail';
 
 const TODAY = isoDate(new Date());
 
 export default function TodayScreen() {
   const { city, setCity, language, setLanguage } = usePanchangamSettings();
   const telugu = language === 'te';
+  const { cardWidth, snapInterval } = useRailMetrics();
+  const railCard = { width: cardWidth };
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [cache, setCache] = useState<Record<string, PanchangamResponse>>({});
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +48,8 @@ export default function TodayScreen() {
     }, [load, selectedDate]),
   );
 
+  const dateStrip = useMemo(() => [-2, -1, 0, 1, 2].map((offset) => addDays(selectedDate, offset)), [selectedDate]);
+
   const onRefresh = () => {
     setRefreshing(true);
     load(selectedDate, true);
@@ -52,9 +59,6 @@ export default function TodayScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>{error}</Text>
-        <Pressable accessibilityRole="button" onPress={() => load(selectedDate, true)} style={({ pressed }) => [styles.retryButton, pressed && styles.pressedControl]}>
-          <Text style={styles.retryText}>{telugu ? 'మళ్ళీ ప్రయత్నించండి' : 'Retry'}</Text>
-        </Pressable>
       </View>
     );
   }
@@ -62,57 +66,178 @@ export default function TodayScreen() {
   if (!data) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={colors.ember} size="large" />
+        <ActivityIndicator color={colors.orange} size="large" />
       </View>
     );
   }
-
-  const showCalculationInfo = () =>
-    Alert.alert(
-      telugu ? 'గణన వివరాలు' : 'Calculation details',
-      [`${telugu ? 'ప్రొఫైల్' : 'Profile'}: ${data.source.profile}`, data.source.note].filter(Boolean).join('\n\n'),
-    );
 
   return (
     <ScrollView
       style={styles.screen}
       contentContainerStyle={styles.shell}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.ember} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.orange} />}
     >
       <View style={styles.appFrame}>
-        <View style={styles.topBar}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Previous day" hitSlop={8} onPress={() => setSelectedDate(addDays(data.date, -1))} style={({ pressed }) => [styles.arrowButton, pressed && styles.pressedControl]}>
-            <Text style={styles.arrowText}>‹</Text>
-          </Pressable>
-          <View style={styles.topCenter}>
-            <Text style={styles.brand}>{telugu ? 'SoHum పంచాంగం' : 'SoHum Panchangam'}</Text>
-            {selectedDate !== TODAY && (
-              <Pressable accessibilityRole="button" hitSlop={8} onPress={() => setSelectedDate(TODAY)} style={({ pressed }) => [styles.todayChip, pressed && styles.pressedControl]}>
-                <Text style={styles.todayChipText}>{telugu ? 'ఈరోజు' : 'Today'}</Text>
-              </Pressable>
-            )}
+        <View style={styles.header}>
+          <View style={styles.brandRow}>
+            <View style={styles.logoBadge}>
+              <Text style={styles.logoBadgeText}>ఓం</Text>
+            </View>
+            <View style={styles.brandCopy}>
+              <Text style={styles.brand}>{telugu ? 'SoHum పంచాంగం' : 'SoHum Panchangam'}</Text>
+              <Text style={styles.location}>⌖ {telugu ? city.name_te : city.name_en}</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Open settings"
+              hitSlop={10}
+              onPress={() => setSettingsOpen(true)}
+              style={({ pressed }) => [styles.settingsDot, pressed && styles.pressedControl]}
+            >
+              <Text style={styles.settingsDotText}>⚙</Text>
+            </Pressable>
           </View>
-          <Pressable accessibilityRole="button" accessibilityLabel="Next day" hitSlop={8} onPress={() => setSelectedDate(addDays(data.date, 1))} style={({ pressed }) => [styles.arrowButton, pressed && styles.pressedControl]}>
-            <Text style={styles.arrowText}>›</Text>
-          </Pressable>
+
+          <View style={styles.datePanel}>
+            <View style={styles.dayNav}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Previous day"
+              hitSlop={8}
+              onPress={() => setSelectedDate(addDays(data.date, -1))}
+              style={({ pressed }) => [styles.arrowButton, pressed && styles.arrowButtonPressed]}
+            >
+              <Text style={styles.arrowText}>‹</Text>
+            </Pressable>
+              <View style={styles.dayTitle}>
+                <Text style={styles.vara}>{telugu ? data.vara.name_te : data.vara.name_en}</Text>
+                <Text style={styles.date}>{formatDateLong(data.date)}</Text>
+                <Text style={styles.monthLine}>{telugu ? `${data.lunar_month.name_te} · ${pakshaTe(data.tithi.paksha)} పక్షం` : `${data.lunar_month.name_en} · ${data.tithi.paksha} Paksha`}</Text>
+              </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Next day"
+              hitSlop={8}
+              onPress={() => {
+                const nextDate = addDays(data.date, 1);
+                setSelectedDate(nextDate);
+              }}
+              style={({ pressed }) => [styles.arrowButton, pressed && styles.arrowButtonPressed]}
+            >
+              <Text style={styles.arrowText}>›</Text>
+            </Pressable>
+            </View>
+
+            <View style={styles.dateStrip}>
+              {dateStrip.map((date) => {
+                const itemParts = formatDateParts(date);
+                const active = date === selectedDate;
+                return (
+                  <Pressable
+                    key={date}
+                    hitSlop={6}
+                    onPress={() => setSelectedDate(date)}
+                    style={({ pressed }) => [styles.datePill, active && styles.datePillActive, pressed && styles.pressedControl]}
+                  >
+                    <Text style={[styles.datePillWeekday, active && styles.datePillTextActive]}>{weekdayShort(date, language)}</Text>
+                    <Text style={[styles.datePillDay, active && styles.datePillTextActive]}>{itemParts.day}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
         </View>
 
-        <TodayPanel
-          data={data}
-          language={language}
-          cityLabel={telugu ? city.name_te : city.name_en}
-          onCityPress={() => setSettingsOpen(true)}
-          onInfoPress={showCalculationInfo}
-        />
-
-        {data.festivals.length > 0 && (
-          <View style={styles.festivals}>
-            <Text style={styles.festivalsTitle}>{telugu ? 'ఈరోజు విశేషం' : 'Today’s observance'}</Text>
-            {data.festivals.map((festival) => (
-              <Text key={festival} style={styles.festivalText}>✦ {festival}</Text>
-            ))}
+        <View style={styles.content}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{telugu ? 'ఈరోజు' : 'Today'}</Text>
+            <Text style={styles.swipeHint}>{telugu ? 'కార్డులను స్వైప్ చేయండి →' : 'Swipe cards →'}</Text>
           </View>
-        )}
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            decelerationRate="fast"
+            snapToInterval={snapInterval}
+            contentContainerStyle={railStyles.cardRail}
+          >
+            <Card style={[styles.heroCard, railCard]}>
+              <View style={styles.heroTopRow}>
+                <View style={styles.heroCopy}>
+                  <Text style={styles.heroLabel}>{telugu ? 'ఈరోజు తిథి' : 'Today’s tithi'}</Text>
+                  <Text style={styles.heroValue}>{telugu ? data.tithi.name_te : data.tithi.name_en}</Text>
+                  <Text style={styles.heroSub}>{telugu ? `${pakshaTe(data.tithi.paksha)} పక్షం` : `${data.tithi.paksha} Paksha`}</Text>
+                  <Text style={styles.heroSmall}>{telugu ? 'ముగింపు ' : 'Ends '}{formatTime(data.tithi.ends_at)}</Text>
+                </View>
+                <View style={styles.heroMoon}>
+                  <Text style={styles.heroMoonText}>◐</Text>
+                </View>
+              </View>
+              <View style={styles.sunGrid}>
+                <View style={styles.sunChip}>
+                  <Text style={styles.cardLabel}>🌅 {telugu ? 'సూర్యోదయం' : 'Sunrise'}</Text>
+                  <Text style={styles.compactValue}>{formatTime(data.sunrise)}</Text>
+                </View>
+                <View style={styles.sunChip}>
+                  <Text style={styles.cardLabel}>🌇 {telugu ? 'సూర్యాస్తమయం' : 'Sunset'}</Text>
+                  <Text style={styles.compactValue}>{formatTime(data.sunset)}</Text>
+                </View>
+              </View>
+            </Card>
+
+            <Card style={[styles.moonCard, railCard]}>
+              <View style={styles.heroTopRow}>
+                <View style={styles.heroCopy}>
+                  <Text style={styles.heroLabel}>{telugu ? 'చంద్రుడు' : 'Moon'}</Text>
+                  <Text style={styles.heroValue}>{telugu ? data.moon_rashi.name_te : data.moon_rashi.name_en}</Text>
+                  <Text style={styles.heroSub}>{telugu ? 'రాశి' : 'Rashi'}</Text>
+                </View>
+                <View style={railStyles.moonBadge}>
+                  <Text style={railStyles.moonIcon}>◐</Text>
+                </View>
+              </View>
+              <View style={styles.sunGrid}>
+                <View style={styles.sunChip}>
+                  <Text style={styles.cardLabel}>🌙 {telugu ? 'చంద్రోదయం' : 'Moonrise'}</Text>
+                  <Text style={styles.compactValue}>{formatTime(data.moonrise)}</Text>
+                </View>
+                <View style={styles.sunChip}>
+                  <Text style={styles.cardLabel}>🌑 {telugu ? 'చంద్రాస్తమయం' : 'Moonset'}</Text>
+                  <Text style={styles.compactValue}>{formatTime(data.moonset)}</Text>
+                </View>
+              </View>
+            </Card>
+
+            {data.festivals.length > 0 && (
+              <Card style={[railStyles.festivalCard, railCard]}>
+                <Text style={railStyles.panelTitle}>{telugu ? 'ఈరోజు విశేషం' : 'Today’s observance'}</Text>
+                {data.festivals.map((festival) => (
+                  <Text key={festival} style={railStyles.festivalText}>✦ {festival}</Text>
+                ))}
+              </Card>
+            )}
+          </ScrollView>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{telugu ? 'వివరాలు' : 'Details'}</Text>
+            <Text style={styles.swipeHint}>{telugu ? 'కార్డులను స్వైప్ చేయండి →' : 'Swipe cards →'}</Text>
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            decelerationRate="fast"
+            snapToInterval={snapInterval}
+            contentContainerStyle={railStyles.cardRail}
+          >
+            <DetailCard title={panchangamCardTitle(telugu)} lines={primaryDayLines(data, language)} style={railCard} />
+            <DetailCard title={muhurtaCardTitle(telugu)} lines={muhurtaLines(data, language)} style={railCard} />
+            <Card style={[railStyles.sankalpamCard, railCard]}>
+              <Text style={railStyles.panelTitle}>{sankalpamCardTitle(telugu)}</Text>
+              <Text style={railStyles.sankalpamText}>{data.sankalpam}</Text>
+            </Card>
+          </ScrollView>
+        </View>
       </View>
       <SettingsModal
         citySlug={city.slug}
@@ -174,24 +299,54 @@ function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLang
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.night },
+  screen: { flex: 1, backgroundColor: colors.creamDeep },
   shell: { alignItems: 'center', minHeight: '100%' },
-  appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: colors.night, paddingBottom: 24 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.night, padding: 24, gap: 14 },
-  errorText: { color: colors.nightText, textAlign: 'center' },
-  retryButton: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 999, backgroundColor: colors.ember },
-  retryText: { color: colors.white, fontWeight: '800' },
-  topBar: { flexDirection: 'row', alignItems: 'center', paddingTop: 48, paddingBottom: 14, paddingHorizontal: 12 },
-  topCenter: { flex: 1, alignItems: 'center', gap: 6 },
-  brand: { color: colors.nightText, fontWeight: '800', fontSize: 17 },
-  arrowButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.nightCard, borderWidth: 1, borderColor: colors.nightLine, alignItems: 'center', justifyContent: 'center' },
-  arrowText: { color: colors.nightText, fontSize: 26, lineHeight: 29 },
-  todayChip: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999, borderWidth: 1, borderColor: colors.ember },
-  todayChipText: { color: colors.ember, fontSize: 12, fontWeight: '800' },
-  festivals: { marginTop: 14, marginHorizontal: 12, padding: 14, borderRadius: 18, backgroundColor: colors.nightCard, borderWidth: 1, borderColor: colors.nightLine },
-  festivalsTitle: { color: colors.ember, fontSize: 12, fontWeight: '800', letterSpacing: 0.3 },
-  festivalText: { color: colors.nightText, fontSize: 14, fontWeight: '700', marginTop: 8 },
+  appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: colors.cream },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.cream, padding: 24 },
+  errorText: { color: colors.maroon, textAlign: 'center' },
+  header: { backgroundColor: colors.cream, paddingTop: 42, paddingBottom: 8, paddingHorizontal: 16 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  logoBadge: { width: 40, height: 40, borderRadius: 14, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 2 },
+  logoBadgeText: { color: colors.maroon, fontWeight: '800', fontSize: 17 },
+  brandCopy: { flex: 1 },
+  brand: { color: colors.ink, fontWeight: '800', fontSize: 19 },
+  location: { color: colors.muted, marginTop: 3, fontWeight: '600', fontSize: 11 },
+  settingsDot: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
+  settingsDotText: { color: colors.maroon },
   pressedControl: { opacity: 0.72 },
+  datePanel: { marginTop: 14, borderRadius: 20, padding: 13, backgroundColor: colors.maroon, overflow: 'hidden', shadowColor: colors.maroon, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 16, elevation: 3 },
+  dayNav: { minHeight: 72, width: '100%', alignItems: 'center', flexDirection: 'row', zIndex: 2 },
+  arrowButton: { width: 48, height: 48, borderRadius: 14, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center' },
+  arrowButtonPressed: { backgroundColor: '#ffffff28' },
+  arrowText: { color: colors.white, fontSize: 27, lineHeight: 30 },
+  dayTitle: { flex: 1, alignItems: 'center', paddingHorizontal: 8 },
+  vara: { color: colors.gold, fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
+  date: { color: colors.white, fontSize: 19, fontWeight: '800', marginTop: 2, textAlign: 'center', lineHeight: 24 },
+  monthLine: { color: '#ffe7d8', marginTop: 4, fontWeight: '600', fontSize: 12, textAlign: 'center' },
+  dateStrip: { flexDirection: 'row', gap: 7, marginTop: 13 },
+  datePill: { flex: 1, minHeight: 48, borderRadius: 15, borderWidth: 1, borderColor: '#ffffff21', backgroundColor: '#ffffff10', alignItems: 'center', justifyContent: 'center' },
+  datePillActive: { backgroundColor: colors.card, borderColor: colors.card },
+  datePillWeekday: { color: '#f5cfb5', fontWeight: '800', fontSize: 11 },
+  datePillDay: { color: '#f5cfb5', fontWeight: '800', fontSize: 18, marginTop: 1 },
+  datePillTextActive: { color: colors.maroon },
+  content: { paddingVertical: 8, gap: 8, paddingBottom: 22 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 18, marginTop: 2 },
+  sectionTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
+  swipeHint: { color: colors.muted, fontSize: 11, fontWeight: '700' },
+  heroCard: { backgroundColor: colors.card, borderColor: colors.line, padding: 14 },
+  moonCard: { backgroundColor: colors.card, borderColor: colors.line, padding: 14 },
+  heroTopRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  heroCopy: { flex: 1 },
+  heroLabel: { color: colors.orange, fontWeight: '800', fontSize: 11, letterSpacing: 0.3 },
+  heroValue: { color: colors.ink, fontSize: 26, fontWeight: '800', marginTop: 4, letterSpacing: -0.4 },
+  heroSub: { color: colors.muted, marginTop: 3, fontWeight: '600', fontSize: 13 },
+  heroSmall: { color: colors.maroon, marginTop: 8, fontWeight: '700', fontSize: 13 },
+  heroMoon: { width: 46, height: 46, borderRadius: 14, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
+  heroMoonText: { color: '#e8edf4', fontSize: 27 },
+  sunGrid: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  sunChip: { flex: 1, borderRadius: 14, backgroundColor: colors.peach, paddingVertical: 9, paddingHorizontal: 10 },
+  cardLabel: { color: colors.muted, fontWeight: '700', fontSize: 11 },
+  compactValue: { color: colors.ink, fontSize: 16, fontWeight: '800', marginTop: 3 },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#291a1370' },
   settingsSheet: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, paddingBottom: 28 },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },

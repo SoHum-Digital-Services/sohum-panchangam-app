@@ -26,11 +26,13 @@ export interface Nakshatra extends NamedPeriod {
 export interface Yoga extends NamedPeriod {
   index: number;
   name_en: string;
+  name_te?: string;
 }
 
 export interface Karana extends NamedPeriod {
   index: number;
   name_en: string;
+  name_te?: string;
 }
 
 export interface LunarMonth {
@@ -62,6 +64,8 @@ export interface Muhurta {
   madhyahna_sandhya: NamedPeriod;
   sayam_sandhya: NamedPeriod;
   pradosha_kalam: NamedPeriod;
+  // Not returned by the API yet (only on its unmerged day-shape branch); shown when present.
+  durmuhurtham?: NamedPeriod[];
 }
 
 export interface NamedCycle {
@@ -101,4 +105,13 @@ export interface PanchangamResponse {
   ritu: NamedCycle;
   ayana: NamedCycle;
   sankalpam: string;
+}
+
+// One entry from GET /v1/festivals.
+export interface FestivalItem {
+  key: string;
+  name: string;
+  name_te: string;
+  date: string;
+  weekday: string;
 }

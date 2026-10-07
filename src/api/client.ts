@@ -1,4 +1,4 @@
-import type { PanchangamResponse } from './types';
+import type { FestivalItem, PanchangamResponse } from './types';
 
 export const API_BASE_URL = 'https://panchangam-eight.vercel.app';
 
@@ -54,4 +54,19 @@ export async function fetchPanchangamRange(
   }
   const body: { count: number; days: PanchangamResponse[] } = await res.json();
   return body.days;
+}
+
+export async function fetchFestivals(startDate: string, endDate: string, city: City): Promise<FestivalItem[]> {
+  const params = new URLSearchParams({
+    start_date: startDate,
+    end_date: endDate,
+    latitude: String(city.latitude),
+    longitude: String(city.longitude),
+  });
+  const res = await fetch(`${API_BASE_URL}/v1/festivals?${params.toString()}`);
+  if (!res.ok) {
+    throw new Error(`Festivals API error: ${res.status}`);
+  }
+  const body: { festivals: FestivalItem[] } = await res.json();
+  return body.festivals;
 }
