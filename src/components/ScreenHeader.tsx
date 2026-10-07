@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme';
 
-// One header shell for every tab: a maroon card with an eyebrow label, a
+// One header shell for every tab: a terracotta card with an eyebrow label, a
 // title, and an optional subtitle. Screen-specific controls (date nav,
 // month arrows, a link button) go in `children`, rendered below the text.
 export function ScreenHeader({ eyebrow, title, subtitle, children }: { eyebrow: string; title?: string; subtitle?: string; children?: ReactNode }) {
@@ -31,5 +31,5 @@ const styles = StyleSheet.create({
   },
   eyebrow: { color: colors.gold, fontWeight: '800', fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase' },
   title: { color: colors.white, fontSize: 24, fontWeight: '800', marginTop: 4 },
-  subtitle: { color: '#ffe7d8', fontSize: 12, lineHeight: 17, fontWeight: '600', marginTop: 4 },
+  subtitle: { color: colors.onAccentMuted, fontSize: 12, lineHeight: 17, fontWeight: '600', marginTop: 4 },
 });

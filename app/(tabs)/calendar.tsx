@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   navRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
   navButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center' },
   navButtonText: { color: colors.white, fontSize: 23, fontWeight: '800', lineHeight: 25 },
-  calendarCard: { marginHorizontal: 16, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, borderRadius: 22, padding: 9, shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 1 },
+  calendarCard: { marginHorizontal: 16, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, borderRadius: 22, padding: 9, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 1 },
   weekRow: { flexDirection: 'row', paddingHorizontal: 2, paddingTop: 3, paddingBottom: 7 },
   weekdayLabel: { flex: 1, textAlign: 'center', color: colors.muted, fontWeight: '800', fontSize: 11, letterSpacing: 0.2 },
   grid: { gap: 4 },

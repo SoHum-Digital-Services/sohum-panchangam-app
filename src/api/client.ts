@@ -1,4 +1,5 @@
-import type { FestivalItem, PanchangamResponse } from './types';
+import type { FestivalItem, PanchangamResponse, TithiDaysResponse } from './types';
+import { monthlyObservances } from '../monthlyObservances';
 
 // sohum.cc proxies /v1/* to the panchangam API (rewrites in the SoHum-Digital-Services/website repo).
 export const API_BASE_URL = 'https://sohum.cc';
@@ -70,4 +71,17 @@ export async function fetchFestivals(startDate: string, endDate: string, city: C
   }
   const body: { festivals: FestivalItem[] } = await res.json();
   return body.festivals;
+}
+
+export async function fetchMonthlyObservances(startDate: string, endDate: string, city: City): Promise<FestivalItem[]> {
+  const params = new URLSearchParams({
+    start_date: startDate,
+    end_date: endDate,
+    latitude: String(city.latitude),
+    longitude: String(city.longitude),
+  });
+  const res = await fetch(`${API_BASE_URL}/v1/tithi-days?${params.toString()}`);
+  if (!res.ok) throw new Error(`Tithi days API error: ${res.status}`);
+  const body: TithiDaysResponse = await res.json();
+  return monthlyObservances(body.days);
 }

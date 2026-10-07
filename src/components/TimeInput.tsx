@@ -33,7 +33,7 @@ export function TimeInput({ value, onChange }: { value: string; onChange: (time:
           if (digits.length === 2) minuteRef.current?.focus();
         }}
         placeholder="HH"
-        placeholderTextColor="#ab9989"
+        placeholderTextColor={colors.muted}
         keyboardType="number-pad"
         maxLength={2}
         style={[styles.box, styles.boxSmall]}
@@ -52,7 +52,7 @@ export function TimeInput({ value, onChange }: { value: string; onChange: (time:
           if (e.nativeEvent.key === 'Backspace' && m.length === 0) hourRef.current?.focus();
         }}
         placeholder="MM"
-        placeholderTextColor="#ab9989"
+        placeholderTextColor={colors.muted}
         keyboardType="number-pad"
         maxLength={2}
         style={[styles.box, styles.boxSmall]}

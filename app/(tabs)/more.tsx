@@ -27,14 +27,14 @@ export default function MoreScreen() {
           />
           <FeatureCard
             icon="∞"
-            title={telugu ? 'వివాహ పొంతన' : 'Marriage compatibility'}
+            title={telugu ? 'వివాహ మైత్రి' : 'Marriage Compatibility'}
             description={telugu ? 'ఎనిమిది కూటలతో అష్టకూట / గుణ మిలన్ మరియు దోష ఫ్లాగ్‌లు.' : 'Aṣṭakoota / Guna Milan with all eight kootas and dosha flags.'}
             action={telugu ? 'పొంతన చూడండి' : 'Check compatibility'}
             onPress={() => router.push('/compatibility')}
           />
           <FeatureCard
             icon="✦"
-            title={telugu ? 'శిశు జనన దోషం' : 'Gandamool check'}
+            title={telugu ? 'శిశు జనన నక్షత్ర దోషం' : 'Child Birth Nakshatra Dosha'}
             description={telugu ? 'గండమూల స్థితి, జనన నక్షత్రం మరియు సాంప్రదాయ పరిహారాలు.' : 'Gandamool status, birth nakshatra and traditional remedy guidance.'}
             action={telugu ? 'గండమూలం చూడండి' : 'Check Gandamool'}
             onPress={() => router.push({ pathname: '/horoscope', params: { mode: 'doshas' } })}
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   action: { alignItems: 'center', backgroundColor: colors.maroon, borderRadius: 12, minHeight: 44, justifyContent: 'center', marginTop: 12 },
   actionPressed: { opacity: 0.78 },
   actionText: { color: colors.white, fontSize: 13, fontWeight: '800' },
-  noteCard: { backgroundColor: colors.peach, borderColor: '#ffd7b8' },
+  noteCard: { backgroundColor: colors.peach, borderColor: colors.line },
   noteTitle: { color: colors.maroon, fontSize: 14, fontWeight: '800' },
   noteText: { color: colors.ink, fontSize: 12, lineHeight: 18, marginTop: 5 },
 });
