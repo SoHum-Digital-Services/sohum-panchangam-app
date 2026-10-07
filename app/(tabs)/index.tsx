@@ -290,7 +290,7 @@ function SettingsModal({ citySlug, language, onClose, onSelectCity, onSelectLang
           </View>
           <View style={styles.methodNote}>
             <Text style={styles.methodTitle}>{telugu ? 'గణన ప్రొఫైల్' : 'Calculation profile'}</Text>
-            <Text style={styles.methodText}>{telugu ? 'దృక్ పంచాంగం · లాహిరి అయనాంశ · సూర్యోదయ ఆధారిత వైదిక దినం' : 'Drik Panchangam · Lahiri ayanamsha · sunrise-based Vedic day'}</Text>
+            <Text style={styles.methodText}>{telugu ? 'సూర్య సిద్ధాంత పంచాంగం · సూర్యోదయ ఆధారిత వైదిక దినం' : 'Surya Siddhanta panchangam · sunrise-based Vedic day'}</Text>
           </View>
         </View>
       </View>

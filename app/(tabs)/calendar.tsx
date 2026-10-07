@@ -1,36 +1,41 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { fetchPanchangamRange } from '../../src/api/client';
-import type { PanchangamResponse } from '../../src/api/types';
-import { Card } from '../../src/components/Card';
-import { DetailCard } from '../../src/components/DetailCard';
+import { fetchFestivals, fetchPanchangamRange } from '../../src/api/client';
+import type { FestivalItem, PanchangamResponse } from '../../src/api/types';
+import { DayPanel } from '../../src/components/DayPanel';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { colors } from '../../src/theme';
-import { formatDateParts, isoDate } from '../../src/format';
+import { addDays, isoDate } from '../../src/format';
 import { buildMonthGrid, monthBounds, MONTH_NAMES, WEEKDAY_LABELS } from '../../src/monthGrid';
-import { calendarMarkers, muhurtaCardTitle, muhurtaLines, panchangamCardTitle, primaryDayLines, sankalpamCardTitle } from '../../src/panchangamUi';
-import { usePanchangamSettings, type AppLanguage } from '../../src/settings';
-import { railStyles, useRailMetrics } from '../../src/rail';
+import { calendarMarkers } from '../../src/panchangamUi';
+import { usePanchangamSettings } from '../../src/settings';
 
 const TODAY = isoDate(new Date());
 
 export default function CalendarScreen() {
   const { city, language } = usePanchangamSettings();
   const telugu = language === 'te';
-  const { cardWidth, snapInterval } = useRailMetrics();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
   const [days, setDays] = useState<Record<string, PanchangamResponse> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(TODAY);
+  const [upcoming, setUpcoming] = useState<FestivalItem[]>([]);
+  const [upcomingLoading, setUpcomingLoading] = useState(false);
 
   const load = useCallback(async (y: number, m: number) => {
     try {
       setError(null);
       setDays(null);
       const { start, end } = monthBounds(y, m);
+      // Festivals load alongside the month (up to ~6 weeks past it, for the panel's upcoming list) but never block it.
+      setUpcomingLoading(true);
+      fetchFestivals(start, addDays(end, 45), city)
+        .then(setUpcoming)
+        .catch(() => setUpcoming([]))
+        .finally(() => setUpcomingLoading(false));
       const results = await fetchPanchangamRange(start, end, city);
       const byDate: Record<string, PanchangamResponse> = {};
       for (const d of results) byDate[d.date] = d;
@@ -124,48 +129,13 @@ export default function CalendarScreen() {
           )}
         </View>
 
-        {selected && <SelectedDayDetails day={selected} language={language} cardWidth={cardWidth} snapInterval={snapInterval} />}
+        {selected && (
+          <View style={styles.details}>
+            <DayPanel data={selected} language={language} cityLabel={telugu ? city.name_te : city.name_en} upcoming={upcoming} upcomingLoading={upcomingLoading} />
+          </View>
+        )}
       </View>
     </ScrollView>
-  );
-}
-
-function SelectedDayDetails({ day, language, cardWidth, snapInterval }: { day: PanchangamResponse; language: AppLanguage; cardWidth: number; snapInterval: number }) {
-  const parts = formatDateParts(day.date);
-  const railCard = { width: cardWidth };
-  const telugu = language === 'te';
-  return (
-    <View style={styles.details}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{parts.day} {parts.month} · {telugu ? day.tithi.name_te : day.tithi.name_en}</Text>
-        <Text style={styles.swipeHint}>{telugu ? 'కార్డులను స్వైప్ చేయండి →' : 'Swipe cards →'}</Text>
-      </View>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        decelerationRate="fast"
-        snapToInterval={snapInterval}
-        contentContainerStyle={railStyles.cardRail}
-      >
-        <DetailCard title={panchangamCardTitle(telugu)} lines={primaryDayLines(day, language)} style={railCard} />
-        <DetailCard title={muhurtaCardTitle(telugu)} lines={muhurtaLines(day, language)} style={railCard} />
-
-        {day.festivals.length > 0 && (
-          <Card style={[railStyles.festivalCard, railCard]}>
-            <Text style={railStyles.panelTitle}>{telugu ? 'పండుగలు' : 'Festivals'}</Text>
-            {day.festivals.map((festival) => (
-              <Text key={festival} style={railStyles.festivalText}>✦ {festival}</Text>
-            ))}
-          </Card>
-        )}
-
-        <Card style={[railStyles.sankalpamCard, railCard]}>
-          <Text style={railStyles.panelTitle}>{sankalpamCardTitle(telugu)}</Text>
-          <Text style={railStyles.sankalpamText}>{day.sankalpam}</Text>
-        </Card>
-      </ScrollView>
-    </View>
   );
 }
 
@@ -190,11 +160,5 @@ const styles = StyleSheet.create({
   marker: { color: colors.orange, fontSize: 10 },
   markerSelected: { color: colors.gold },
   errorText: { color: colors.maroon, textAlign: 'center', padding: 16 },
-  details: { paddingVertical: 10, gap: 7, paddingBottom: 22 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 18 },
-  sectionTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
-  swipeHint: { color: colors.muted, fontSize: 11, fontWeight: '700' },
-  detailCard: { gap: 6, padding: 14 },
-  detailHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  infoDot: { color: colors.muted, fontSize: 15 },
+  details: { paddingTop: 14, paddingBottom: 22 },
 });

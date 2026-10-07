@@ -16,4 +16,7 @@ export const colors = {
   card: '#fffdf8',
   line: '#ead9be',
   white: '#ffffff',
+  moonLit: '#b4bccb',
+  moonDark: '#363e4a',
+  moonTile: '#2b3037',
 };
