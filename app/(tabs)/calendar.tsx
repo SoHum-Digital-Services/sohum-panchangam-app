@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useIsFocused } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchFestivals, fetchPanchangamRange } from '../../src/api/client';
 import type { FestivalItem, PanchangamResponse } from '../../src/api/types';
 import { DayPanel } from '../../src/components/DayPanel';
-import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { colors } from '../../src/theme';
 import { addDays, isoDate } from '../../src/format';
 import { buildMonthGrid, monthBounds, MONTH_NAMES, WEEKDAY_LABELS } from '../../src/monthGrid';
@@ -15,6 +16,8 @@ const TODAY = isoDate(new Date());
 
 export default function CalendarScreen() {
   const { city, language } = usePanchangamSettings();
+  const insets = useSafeAreaInsets();
+  const focused = useIsFocused();
   const telugu = language === 'te';
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -70,20 +73,16 @@ export default function CalendarScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.shell}>
       <View style={styles.appFrame}>
-        <ScreenHeader
-          eyebrow={telugu ? 'SoHum పంచాంగం' : 'SoHum Panchangam'}
-          title={`${MONTH_NAMES[month]} ${year}`}
-          subtitle={`⌖ ${telugu ? city.name_te : city.name_en}`}
-        >
-          <View style={styles.navRow}>
-            <Pressable onPress={goPrevMonth} style={styles.navButton}>
-              <Text style={styles.navButtonText}>‹</Text>
-            </Pressable>
-            <Pressable onPress={goNextMonth} style={styles.navButton}>
-              <Text style={styles.navButtonText}>›</Text>
-            </Pressable>
-          </View>
-        </ScreenHeader>
+        {focused && <StatusBar style="dark" />}
+        <View style={[styles.navRow, { paddingTop: insets.top + 16 }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'మునుపటి నెల' : 'Previous month'} onPress={goPrevMonth} style={styles.navButton}>
+            <Text style={styles.navButtonText}>‹</Text>
+          </Pressable>
+          <Text style={styles.monthTitle}>{MONTH_NAMES[month]} {year}</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'తదుపరి నెల' : 'Next month'} onPress={goNextMonth} style={styles.navButton}>
+            <Text style={styles.navButtonText}>›</Text>
+          </Pressable>
+        </View>
 
         <View style={styles.calendarCard}>
           <View style={styles.weekRow}>
@@ -109,7 +108,10 @@ export default function CalendarScreen() {
                     return (
                       <Pressable
                         key={cell.date}
-                        style={[styles.cell, isSelected && styles.cellSelected]}
+                        accessibilityRole="button"
+                        accessibilityLabel={cell.date}
+                        accessibilityState={{ selected: isSelected }}
+                        style={styles.cell}
                         onPress={() => setSelectedDate(cell.date!)}
                       >
                         <Text style={[styles.cellDay, isToday && styles.cellDayToday, isSelected && styles.cellDaySelected]}>
@@ -117,7 +119,7 @@ export default function CalendarScreen() {
                         </Text>
                         <View style={styles.markerRow}>
                           {markers.map((marker, index) => (
-                            <Text key={`${marker}-${index}`} style={[styles.marker, isSelected && styles.markerSelected]}>{marker}</Text>
+                            <Text key={`${marker}-${index}`} style={styles.marker}>{marker}</Text>
                           ))}
                         </View>
                       </Pressable>
@@ -140,25 +142,24 @@ export default function CalendarScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.creamDeep },
+  screen: { flex: 1, backgroundColor: colors.white },
   shell: { alignItems: 'center', minHeight: '100%' },
-  appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: colors.cream },
-  navRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
-  navButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: '#ffffff16', borderWidth: 1, borderColor: '#ffffff24', alignItems: 'center', justifyContent: 'center' },
-  navButtonText: { color: colors.white, fontSize: 23, fontWeight: '800', lineHeight: 25 },
-  calendarCard: { marginHorizontal: 16, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, borderRadius: 22, padding: 9, shadowColor: '#5b2a10', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 1 },
-  weekRow: { flexDirection: 'row', paddingHorizontal: 2, paddingTop: 3, paddingBottom: 7 },
-  weekdayLabel: { flex: 1, textAlign: 'center', color: colors.muted, fontWeight: '800', fontSize: 11, letterSpacing: 0.2 },
+  appFrame: { width: '100%', maxWidth: 430, minHeight: '100%', backgroundColor: colors.white },
+  navRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingBottom: 20 },
+  navButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#f15a06', alignItems: 'center', justifyContent: 'center' },
+  navButtonText: { color: colors.white, fontSize: 32, lineHeight: 36 },
+  monthTitle: { flex: 1, textAlign: 'center', color: '#141c26', fontSize: 22, fontWeight: '700' },
+  calendarCard: { paddingHorizontal: 8, backgroundColor: colors.white },
+  weekRow: { flexDirection: 'row', paddingHorizontal: 2, paddingTop: 4, paddingBottom: 14 },
+  weekdayLabel: { flex: 1, textAlign: 'center', color: '#676767', fontWeight: '400', fontSize: 14 },
   grid: { gap: 4 },
   calendarRow: { flexDirection: 'row', gap: 4 },
-  cell: { flex: 1, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.grid, borderRadius: 12 },
-  cellSelected: { backgroundColor: colors.maroon },
-  cellDay: { fontSize: 15, color: colors.ink, fontWeight: '700' },
+  cell: { flex: 1, aspectRatio: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f3f3', borderRadius: 8 },
+  cellDay: { fontSize: 17, color: '#141c26', fontWeight: '500', width: 30, height: 30, lineHeight: 24, textAlign: 'center', paddingVertical: 3, borderRadius: 8, overflow: 'hidden' },
   cellDayToday: { color: colors.orange, fontWeight: '800' },
-  cellDaySelected: { color: colors.white },
+  cellDaySelected: { color: colors.white, backgroundColor: '#f15a06' },
   markerRow: { minHeight: 14, flexDirection: 'row', gap: 2, marginTop: 1 },
-  marker: { color: colors.orange, fontSize: 10 },
-  markerSelected: { color: colors.gold },
+  marker: { color: '#f15a06', fontSize: 11 },
   errorText: { color: colors.maroon, textAlign: 'center', padding: 16 },
-  details: { paddingTop: 14, paddingBottom: 22 },
+  details: { paddingTop: 40, paddingBottom: 24 },
 });
