@@ -1,7 +1,8 @@
 import type { FestivalItem, PanchangamResponse } from './types';
 
-// sohum.cc proxies /v1/* to the panchangam API (rewrites in the SoHum-Digital-Services/website repo).
-export const API_BASE_URL = 'https://sohum.cc';
+// The panchangam engine on Google Cloud Run (asia-south1). It used to be reached through sohum.cc's
+// /v1 rewrites, but Vercel paused the website and the engine on 12 Oct 2026.
+export const API_BASE_URL = 'https://panchangam-1007417351252.asia-south1.run.app';
 
 export interface City {
   slug: string;
