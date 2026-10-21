@@ -26,7 +26,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "web:lan": "expo start --web --host lan"
+    "web:lan": "expo start --web --host lan",
+    "build:web": "expo export -p web"
   },
   "private": true
 }
