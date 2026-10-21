@@ -1,0 +1,12 @@
+// Serves the web build (npx expo export -p web -> dist/) at panchangam.sohum.cc as a
+// Cloudflare Worker with static assets only: no server code, no secrets.
+{
+  "name": "sohum-panchangam-web",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    // Expo Router's web build is a single page: unknown paths load index.html.
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [{ "pattern": "panchangam.sohum.cc", "custom_domain": true }]
+}
