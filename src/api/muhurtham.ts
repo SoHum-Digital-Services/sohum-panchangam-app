@@ -35,9 +35,9 @@ export interface MuhurthamResult {
 // are listed so people can see what is coming (engine rules added one by one).
 export const EVENTS = [
   { key: 'vivaha', en: 'Vivaha (wedding)', te: 'వివాహం', ready: true },
-  { key: 'gruha_pravesham', en: 'Gruha pravesham', te: 'గృహ ప్రవేశం', ready: false },
-  { key: 'upanayanam', en: 'Upanayanam', te: 'ఉపనయనం', ready: false },
-  { key: 'namakaranam', en: 'Namakaranam', te: 'నామకరణం', ready: false },
+  { key: 'gruha_pravesham', en: 'Gruha pravesham', te: 'గృహ ప్రవేశం', ready: true },
+  { key: 'upanayanam', en: 'Upanayanam', te: 'ఉపనయనం', ready: true },
+  { key: 'namakaranam', en: 'Namakaranam', te: 'నామకరణం', ready: true },
 ] as const;
 export type EventKey = (typeof EVENTS)[number]['key'];
 
