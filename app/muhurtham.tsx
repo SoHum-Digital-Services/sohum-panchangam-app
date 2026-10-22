@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { findMuhurthams, Muhurtham, MuhurthamResult } from '../src/api/muhurtham';
+import { EVENTS, EventKey, findMuhurthams, Muhurtham, MuhurthamResult } from '../src/api/muhurtham';
 import type { Place } from '../src/api/places';
 import { Card } from '../src/components/Card';
 import { DateInput } from '../src/components/DateInput';
@@ -31,6 +31,7 @@ const GRADES = {
   2: { en: 'Good', te: 'మంచిది' },
   3: { en: 'Acceptable', te: 'సాధారణం' },
 } as const;
+type Grade = keyof typeof GRADES;
 
 export default function MuhurthamScreen() {
   const { language } = usePanchangamSettings();
@@ -40,6 +41,8 @@ export default function MuhurthamScreen() {
   const [to, setTo] = useState(addDays(today, 180));
   const [place, setPlace] = useState<Place>(HYDERABAD);
   const [placeOpen, setPlaceOpen] = useState(false);
+  const [event, setEvent] = useState<EventKey>('vivaha');
+  const [eventsOpen, setEventsOpen] = useState(false);
   const [result, setResult] = useState<MuhurthamResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -49,7 +52,7 @@ export default function MuhurthamScreen() {
     if (span < 0) { setError(telugu ? 'ముగింపు తేదీ ప్రారంభ తేదీ తర్వాత ఉండాలి' : 'The end date must be after the start date'); return; }
     if (span > MAX_DAYS) { setError(telugu ? `ఒకసారి ${MAX_DAYS} రోజుల వరకు మాత్రమే వెతకవచ్చు` : `You can search up to ${MAX_DAYS} days at a time`); return; }
     setLoading(true); setError(null);
-    try { setResult(await findMuhurthams(from, to, place)); }
+    try { setResult(await findMuhurthams(from, to, place, event)); }
     catch (e) { setError(e instanceof Error ? e.message : (telugu ? 'గణన విఫలమైంది' : 'Calculation failed')); }
     finally { setLoading(false); }
   };
@@ -58,11 +61,21 @@ export default function MuhurthamScreen() {
     <Pressable accessibilityRole="button" accessibilityLabel={telugu ? 'వెనుకకు' : 'Back'} onPress={() => router.back()} style={styles.back}><Text style={styles.backText}>‹</Text></Pressable>
     <View style={styles.header}>
       <Text style={styles.eyebrow}>Muhurta Chintamani</Text>
-      <Text style={styles.title}>{telugu ? 'వివాహ ముహూర్తాలు' : 'Vivaha muhurthams'}</Text>
-      <Text style={styles.subtitle}>{telugu ? 'మీ ప్రదేశానికి, మీరు ఎంచుకున్న తేదీల మధ్య శుభ వివాహ ముహూర్తాలు' : 'Auspicious wedding times for your place, between the dates you choose'}</Text>
+      <Text style={styles.title}>{telugu ? 'ముహూర్త గణన' : 'Muhurtham calculator'}</Text>
+      <Text style={styles.subtitle}>{telugu ? 'మీ కార్యక్రమానికి, ప్రదేశానికి, మీరు ఎంచుకున్న తేదీల మధ్య శుభ ముహూర్తాలు' : 'Auspicious times for your event and place, between the dates you choose'}</Text>
     </View>
     <View style={styles.content}>
       <Card style={styles.formCard}>
+        <Text style={styles.label}>{telugu ? 'కార్యక్రమం' : 'Event'}</Text>
+        <Pressable accessibilityRole="button" accessibilityState={{ expanded: eventsOpen }} onPress={() => setEventsOpen(!eventsOpen)} style={styles.select}>
+          <Text style={styles.selectText}>{(() => { const e = EVENTS.find((x) => x.key === event)!; return telugu ? e.te : e.en; })()}</Text>
+          <Text style={styles.selectText}>{eventsOpen ? '▴' : '▾'}</Text>
+        </Pressable>
+        {eventsOpen && <View style={styles.options}>{EVENTS.map((e) => <Pressable key={e.key} accessibilityRole="button" accessibilityState={{ disabled: !e.ready, selected: e.key === event }} disabled={!e.ready}
+          onPress={() => { setEvent(e.key); setEventsOpen(false); setResult(null); }} style={[styles.option, e.key === event && styles.optionSelected]}>
+          <Text style={[styles.optionText, !e.ready && styles.optionDisabled]}>{telugu ? e.te : e.en}</Text>
+          {!e.ready && <Text style={styles.soon}>{telugu ? 'త్వరలో' : 'Coming soon'}</Text>}
+        </Pressable>)}</View>}
         <Text style={styles.label}>{telugu ? 'నుండి' : 'From'}</Text>
         <DateInput value={from} onChange={setFrom} />
         <Text style={styles.label}>{telugu ? 'వరకు' : 'To'}</Text>
@@ -81,12 +94,24 @@ export default function MuhurthamScreen() {
 }
 
 function Results({ result, telugu }: { result: MuhurthamResult; telugu: boolean }) {
+  const [tab, setTab] = useState<Grade>(1);
   if (!result.muhurtas.length) {
-    return <Card><Text style={styles.empty}>{telugu ? 'ఈ తేదీల మధ్య వివాహ ముహూర్తాలు లేవు. ఎక్కువ రోజులు ఎంచుకుని మళ్ళీ చూడండి.' : 'No vivaha muhurthams between these dates. Try a longer range.'}</Text></Card>;
+    return <Card><Text style={styles.empty}>{telugu ? 'ఈ తేదీల మధ్య ముహూర్తాలు లేవు. ఎక్కువ రోజులు ఎంచుకుని మళ్ళీ చూడండి.' : 'No muhurthams between these dates. Try a longer range.'}</Text></Card>;
   }
+  const shown = result.muhurtas.filter((m) => m.grade === tab);
   return <View style={styles.results}>
-    <Text style={styles.count}>{telugu ? `${result.count} ముహూర్తాలు` : `${result.count} muhurthams`}</Text>
-    {result.muhurtas.map((m) => <MuhurthamCard key={m.time} m={m} telugu={telugu} />)}
+    <View style={styles.tabs} accessibilityRole="tablist">
+      {([1, 2, 3] as Grade[]).map((g) => {
+        const n = result.muhurtas.filter((m) => m.grade === g).length;
+        return <Pressable key={g} accessibilityRole="tab" accessibilityState={{ selected: tab === g }} onPress={() => setTab(g)} style={[styles.tab, tab === g && styles.tabActive]}>
+          <Text style={[styles.tabText, tab === g && styles.tabTextActive]}>{telugu ? GRADES[g].te : GRADES[g].en}</Text>
+          <Text style={[styles.tabCount, tab === g && styles.tabTextActive]}>{n}</Text>
+        </Pressable>;
+      })}
+    </View>
+    {shown.length
+      ? shown.map((m) => <MuhurthamCard key={m.time} m={m} telugu={telugu} />)
+      : <Card><Text style={styles.empty}>{telugu ? 'ఈ శ్రేణిలో ఈ తేదీల మధ్య ముహూర్తాలు లేవు.' : 'No muhurthams of this grade between these dates.'}</Text></Card>}
     <Text style={styles.note}>{telugu
       ? 'శ్రేణులు మా ఇంజిన్ స్వంత గణన. ముహూర్తాన్ని నిర్ణయించే ముందు మీ కుటుంబ పురోహితుని సంప్రదించండి.'
       : 'The grades are this engine’s own. Please confirm a muhurtham with your family purohit before fixing it.'}</Text>
@@ -124,7 +149,20 @@ const styles = StyleSheet.create({
   primaryHidden: { opacity: 0 }, primaryText: { color: colors.white, fontWeight: '800', fontSize: 14 },
   error: { color: colors.maroon, fontSize: 12 },
   results: { gap: 10 },
-  count: { color: colors.orange, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+  select: { minHeight: 44, borderWidth: 1, borderColor: colors.line, borderRadius: 12, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.card },
+  selectText: { color: colors.ink, fontSize: 14, fontWeight: '700' },
+  options: { borderWidth: 1, borderColor: colors.line, borderRadius: 12, overflow: 'hidden' },
+  option: { minHeight: 44, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.line },
+  optionSelected: { backgroundColor: colors.peach },
+  optionText: { color: colors.ink, fontSize: 14 },
+  optionDisabled: { color: colors.muted },
+  soon: { color: colors.muted, fontSize: 11, fontWeight: '700' },
+  tabs: { flexDirection: 'row', gap: 6 },
+  tab: { flex: 1, minHeight: 48, borderRadius: 12, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card, paddingVertical: 6 },
+  tabActive: { backgroundColor: colors.maroon, borderColor: colors.maroon },
+  tabText: { color: colors.maroon, fontSize: 13, fontWeight: '800' },
+  tabCount: { color: colors.muted, fontSize: 11, fontWeight: '700' },
+  tabTextActive: { color: colors.white },
   card: { gap: 4 },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   date: { color: colors.ink, fontSize: 15, fontWeight: '800', flexShrink: 1 },
