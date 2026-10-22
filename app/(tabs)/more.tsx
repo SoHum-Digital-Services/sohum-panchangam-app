@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card } from '../../src/components/Card';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { colors } from '../../src/theme';
@@ -10,7 +10,7 @@ export default function MoreScreen() {
   const telugu = language === 'te';
   return (
     <View style={styles.screen}>
-      <View style={styles.appFrame}>
+      <ScrollView style={styles.appFrame} contentContainerStyle={styles.scrollContent}>
         <ScreenHeader
           eyebrow="SoHum Jyotisha"
           title={telugu ? 'మరిన్ని సేవలు' : 'More services'}
@@ -44,7 +44,7 @@ export default function MoreScreen() {
             <Text style={styles.noteText}>{telugu ? 'ఈ సేవలు నేటివ్ యాప్ పేజీలుగా పనిచేస్తాయి. నమోదు చేసిన జనన వివరాలు మీ కాలిక్యులేషన్ API కి మాత్రమే పంపబడతాయి.' : 'These services run as native app pages. Entered birth details are sent only to your calculation API.'}</Text>
           </Card>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -67,6 +67,7 @@ function FeatureCard({ icon, title, description, action, onPress }: { icon: stri
 const styles = StyleSheet.create({
   screen: { flex: 1, alignItems: 'center', backgroundColor: colors.creamDeep },
   appFrame: { width: '100%', maxWidth: 430, flex: 1, backgroundColor: colors.cream },
+  scrollContent: { paddingBottom: 24 },
   content: { paddingHorizontal: 16, gap: 10 },
   featureCard: { padding: 14 },
   featureTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
