@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { router } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { EVENTS, EventKey, findMuhurthams, Muhurtham, MuhurthamResult } from '../src/api/muhurtham';
+import type { BirthDetails } from '../src/api/jyotisha';
 import type { Place } from '../src/api/places';
+import { BirthDetailsFields, HYDERABAD_BIRTH_DETAILS } from '../src/components/BirthDetailsForm';
 import { Card } from '../src/components/Card';
 import { DateInput } from '../src/components/DateInput';
 import { PlaceInput } from '../src/components/PlaceInput';
@@ -43,6 +45,9 @@ export default function MuhurthamScreen() {
   const [placeOpen, setPlaceOpen] = useState(false);
   const [event, setEvent] = useState<EventKey>('vivaha');
   const [eventsOpen, setEventsOpen] = useState(false);
+  const [forPerson, setForPerson] = useState(false);
+  const [person, setPerson] = useState<BirthDetails>(HYDERABAD_BIRTH_DETAILS);
+  const [personPlaceOpen, setPersonPlaceOpen] = useState(false);
   const [result, setResult] = useState<MuhurthamResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -51,8 +56,9 @@ export default function MuhurthamScreen() {
     const span = daysBetween(from, to);
     if (span < 0) { setError(telugu ? 'ముగింపు తేదీ ప్రారంభ తేదీ తర్వాత ఉండాలి' : 'The end date must be after the start date'); return; }
     if (span > MAX_DAYS) { setError(telugu ? `ఒకసారి ${MAX_DAYS} రోజుల వరకు మాత్రమే వెతకవచ్చు` : `You can search up to ${MAX_DAYS} days at a time`); return; }
+    if (forPerson && (!person.birth_date || !person.birth_time)) { setError(telugu ? 'దయచేసి జన్మ తేదీ, జన్మ సమయం నమోదు చేయండి' : 'Please enter the date and time of birth'); return; }
     setLoading(true); setError(null);
-    try { setResult(await findMuhurthams(from, to, place, event)); }
+    try { setResult(await findMuhurthams(from, to, place, event, forPerson ? person : undefined)); }
     catch (e) { setError(e instanceof Error ? e.message : (telugu ? 'గణన విఫలమైంది' : 'Calculation failed')); }
     finally { setLoading(false); }
   };
@@ -83,23 +89,36 @@ export default function MuhurthamScreen() {
         <Text style={styles.label}>{telugu ? 'ప్రదేశం' : 'Place'}</Text>
         <PlaceInput initialLabel={place.label} onSelect={setPlace} onDropdownVisibleChange={setPlaceOpen} />
       </Card>
-      <Pressable accessibilityRole="button" onPress={submit} disabled={placeOpen || loading} style={[styles.primary, placeOpen && styles.primaryHidden]}>
+      <Pressable accessibilityRole="switch" accessibilityState={{ checked: forPerson }} onPress={() => { setForPerson(!forPerson); setResult(null); }} style={styles.toggle}>
+        <Text style={styles.toggleBox}>{forPerson ? '☑' : '☐'}</Text>
+        <Text style={styles.toggleText}>{telugu ? 'ఒక వ్యక్తికి సరిపడే ముహూర్తాలు (తారా బలం, చంద్ర బలం)' : 'Muhurthams suited to a person (Tara and Chandra balam)'}</Text>
+      </Pressable>
+      {forPerson && <Card style={styles.personCard}>
+        <BirthDetailsFields details={person} onChange={setPerson} onPlaceDropdownVisibleChange={setPersonPlaceOpen} />
+        <Text style={styles.note}>{telugu ? 'పేరు మీ ఫోన్‌లోనే ఉంటుంది. జన్మ వివరాలు గణనకు మాత్రమే పంపబడతాయి, నిల్వ చేయబడవు.' : 'The name stays on your phone. Birth details are sent only for the calculation and are not stored.'}</Text>
+      </Card>}
+      <Pressable accessibilityRole="button" onPress={submit} disabled={placeOpen || personPlaceOpen || loading} style={[styles.primary, (placeOpen || personPlaceOpen) && styles.primaryHidden]}>
         {loading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.primaryText}>{telugu ? 'ముహూర్తాలు చూడండి' : 'Find muhurthams'} →</Text>}
       </Pressable>
       {loading && <Text style={styles.note}>{telugu ? 'లెక్కిస్తోంది… కొన్ని సెకన్లు పట్టవచ్చు.' : 'Calculating… this can take a few seconds.'}</Text>}
       {error && <Text style={styles.error}>{error}</Text>}
-      {result && <Results result={result} telugu={telugu} />}
+      {result && <Results result={result} telugu={telugu} name={forPerson ? person.name.trim() : ''} />}
     </View>
   </View></ScrollView>;
 }
 
-function Results({ result, telugu }: { result: MuhurthamResult; telugu: boolean }) {
+function Results({ result, telugu, name }: { result: MuhurthamResult; telugu: boolean; name: string }) {
   const [tab, setTab] = useState<Grade>(1);
+  const who = name || (telugu ? 'ఈ వ్యక్తి' : 'this person');
+  const personLine = result.personal && (telugu
+    ? `${who} కోసం: జన్మ నక్షత్రం ${result.personal.birth_nakshatra_en}, జన్మ రాశి ${result.personal.birth_rashi_en}. తారా బలం లేదా చంద్ర బలం లేని ${result.personal.removed_unsuitable} ముహూర్తాలు తీసివేయబడ్డాయి.`
+    : `For ${who}: birth nakshatra ${result.personal.birth_nakshatra_en}, Moon sign ${result.personal.birth_rashi_en}. ${result.personal.removed_unsuitable} muhurthams without Tara or Chandra balam were left out.`);
   if (!result.muhurtas.length) {
     return <Card><Text style={styles.empty}>{telugu ? 'ఈ తేదీల మధ్య ముహూర్తాలు లేవు. ఎక్కువ రోజులు ఎంచుకుని మళ్ళీ చూడండి.' : 'No muhurthams between these dates. Try a longer range.'}</Text></Card>;
   }
   const shown = result.muhurtas.filter((m) => m.grade === tab);
   return <View style={styles.results}>
+    {personLine && <Card style={styles.personCard}><Text style={styles.detail}>{personLine}</Text></Card>}
     <View style={styles.tabs} accessibilityRole="tablist">
       {([1, 2, 3] as Grade[]).map((g) => {
         const n = result.muhurtas.filter((m) => m.grade === g).length;
@@ -130,6 +149,7 @@ function MuhurthamCard({ m, telugu }: { m: Muhurtham; telugu: boolean }) {
     {telugu
       ? <Text style={styles.detail}>{m.text_te}</Text>
       : <Text style={styles.detail}>{m.lunar_month_en} {m.paksha} {m.tithi_en} · {m.nakshatra_en} nakshatra · {m.lagna_en} lagna</Text>}
+    {m.personal && <Text style={styles.detail}>{telugu ? `తార: ${m.personal.tara_te} · చంద్రుడు ${m.personal.chandra_house}వ స్థానంలో` : `Tara: ${m.personal.tara_en} · Moon in house ${m.personal.chandra_house}`}</Text>}
   </Card>;
 }
 
@@ -157,6 +177,10 @@ const styles = StyleSheet.create({
   optionText: { color: colors.ink, fontSize: 14 },
   optionDisabled: { color: colors.muted },
   soon: { color: colors.muted, fontSize: 11, fontWeight: '700' },
+  toggle: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 },
+  toggleBox: { color: colors.maroon, fontSize: 20 },
+  toggleText: { color: colors.ink, fontSize: 13, fontWeight: '700', flexShrink: 1 },
+  personCard: { zIndex: 9, gap: 6 },
   tabs: { flexDirection: 'row', gap: 6 },
   tab: { flex: 1, minHeight: 48, borderRadius: 12, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card, paddingVertical: 6 },
   tabActive: { backgroundColor: colors.maroon, borderColor: colors.maroon },
