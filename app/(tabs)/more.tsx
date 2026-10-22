@@ -14,7 +14,7 @@ export default function MoreScreen() {
         <ScreenHeader
           eyebrow="SoHum Jyotisha"
           title={telugu ? 'మరిన్ని సేవలు' : 'More services'}
-          subtitle={telugu ? 'జాతకాలు, దశలు, వివాహ పొంతన' : 'Birth charts, daśā and marriage matching'}
+          subtitle={telugu ? 'జాతకాలు, దశలు, వివాహ పొంతన, ముహూర్తాలు' : 'Birth charts, daśā, marriage matching and muhurthams'}
         />
 
         <View style={styles.content}>
@@ -38,6 +38,13 @@ export default function MoreScreen() {
             description={telugu ? 'గండమూల స్థితి, జనన నక్షత్రం మరియు సాంప్రదాయ పరిహారాలు.' : 'Gandamool status, birth nakshatra and traditional remedy guidance.'}
             action={telugu ? 'గండమూలం చూడండి' : 'Check Gandamool'}
             onPress={() => router.push({ pathname: '/horoscope', params: { mode: 'doshas' } })}
+          />
+          <FeatureCard
+            icon="✧"
+            title={telugu ? 'ముహూర్త గణన' : 'Muhurtham calculator'}
+            description={telugu ? 'మీ ప్రదేశానికి, మీరు ఎంచుకున్న తేదీల మధ్య శ్రేణీకృత వివాహ ముహూర్తాలు.' : 'Graded vivaha muhurthams for your place, between the dates you choose.'}
+            action={telugu ? 'ముహూర్తాలు చూడండి' : 'Find muhurthams'}
+            onPress={() => router.push('/muhurtham')}
           />
           <Card style={styles.noteCard}>
             <Text style={styles.noteTitle}>{telugu ? 'మీ ధృవీకరించిన ఇంజిన్‌పై నిర్మించబడింది' : 'Built on your verified engine'}</Text>
