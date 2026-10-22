@@ -1,7 +1,7 @@
 // Serves the web build (npx expo export -p web -> dist/) at panchangam.sohum.cc as a
 // Cloudflare Worker with static assets only: no server code, no secrets.
 {
-  "name": "sohum-panchangam-web",
+  "name": "sohum-panchangam-app",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./dist",
