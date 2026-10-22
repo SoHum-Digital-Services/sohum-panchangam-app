@@ -41,7 +41,7 @@ export function DateInput({ value, onChange }: { value: string; onChange: (isoDa
           if (digits.length === 2) monthRef.current?.focus();
         }}
         placeholder="DD"
-        placeholderTextColor="#ab9989"
+        placeholderTextColor={colors.muted}
         keyboardType="number-pad"
         maxLength={2}
         style={[styles.box, styles.boxSmall]}
@@ -65,7 +65,7 @@ export function DateInput({ value, onChange }: { value: string; onChange: (isoDa
           if (e.nativeEvent.key === 'Backspace' && m.length === 0) dayRef.current?.focus();
         }}
         placeholder="MM"
-        placeholderTextColor="#ab9989"
+        placeholderTextColor={colors.muted}
         keyboardType="number-pad"
         maxLength={2}
         style={[styles.box, styles.boxSmall]}
@@ -83,7 +83,7 @@ export function DateInput({ value, onChange }: { value: string; onChange: (isoDa
           if (e.nativeEvent.key === 'Backspace' && y.length === 0) monthRef.current?.focus();
         }}
         placeholder="YYYY"
-        placeholderTextColor="#ab9989"
+        placeholderTextColor={colors.muted}
         keyboardType="number-pad"
         maxLength={4}
         style={[styles.box, styles.boxYear]}

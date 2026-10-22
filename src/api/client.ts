@@ -1,4 +1,5 @@
-import type { FestivalItem, PanchangamResponse } from './types';
+import type { FestivalItem, PanchangamResponse, TithiDaysResponse } from './types';
+import { monthlyObservances } from '../monthlyObservances';
 
 // The panchangam engine on Google Cloud Run (asia-south1). It used to be reached through sohum.cc's
 // /v1 rewrites, but Vercel paused the website and the engine on 12 Oct 2026.
@@ -71,4 +72,17 @@ export async function fetchFestivals(startDate: string, endDate: string, city: C
   }
   const body: { festivals: FestivalItem[] } = await res.json();
   return body.festivals;
+}
+
+export async function fetchMonthlyObservances(startDate: string, endDate: string, city: City): Promise<FestivalItem[]> {
+  const params = new URLSearchParams({
+    start_date: startDate,
+    end_date: endDate,
+    latitude: String(city.latitude),
+    longitude: String(city.longitude),
+  });
+  const res = await fetch(`${API_BASE_URL}/v1/tithi-days?${params.toString()}`);
+  if (!res.ok) throw new Error(`Tithi days API error: ${res.status}`);
+  const body: TithiDaysResponse = await res.json();
+  return monthlyObservances(body.days);
 }

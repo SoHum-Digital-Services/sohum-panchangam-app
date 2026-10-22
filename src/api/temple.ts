@@ -24,3 +24,40 @@ export async function fetchSevas(): Promise<Seva[]> {
   }
   return res.json();
 }
+
+export interface Stotram {
+  id: string;
+  slug: string;
+  title: string;
+  title_telugu: string;
+  text_telugu: string;
+  deity: string;
+  seva_id: string | null;
+  display_order: number;
+  active_flag: boolean;
+  created_at: string;
+}
+
+export interface TempleNews {
+  id: string;
+  title: string;
+  title_telugu: string;
+  content: string;
+  content_telugu: string;
+  is_important: boolean;
+  event_date?: string | null;
+  active_flag: boolean;
+  created_at: string;
+}
+
+export async function fetchStotrams(): Promise<Stotram[]> {
+  const res = await fetch(`${TEMPLE_API_BASE}/stotrams`);
+  if (!res.ok) throw new Error(`Temple stotrams API error: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchTempleNews(): Promise<TempleNews[]> {
+  const res = await fetch(`${TEMPLE_API_BASE}/news`);
+  if (!res.ok) throw new Error(`Temple news API error: ${res.status}`);
+  return res.json();
+}

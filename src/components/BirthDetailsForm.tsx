@@ -35,7 +35,7 @@ export function BirthDetailsFields({ details, onChange, title, onPlaceDropdownVi
           value={details.name}
           onChangeText={(value) => onChange({ ...details, name: value })}
           placeholder={telugu ? 'పేరు' : 'Name'}
-          placeholderTextColor="#ab9989"
+          placeholderTextColor={colors.muted}
           style={styles.input}
         />
       </View>
